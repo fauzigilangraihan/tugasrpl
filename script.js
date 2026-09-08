@@ -428,15 +428,15 @@ function renderTable() {
             : `<span class="badge badge-terlambat">Terlambat</span>`;
         const tr = document.createElement('tr');
         tr.innerHTML=`
-            <td class="row-num">${i+1}</td>
-            <td><strong>${escHtml(t.name)}</strong></td>
-            <td>${escHtml(t.subject)}</td>
-            <td title="${escHtml(t.title)}">${escHtml(t.title.length>38?t.title.slice(0,38)+'…':t.title)}</td>
-            <td>${renderFileCell(t)}</td>
-            <td>${fmtDate(t.date)}</td>
-            <td>${fmtDate(t.deadline)}</td>
-            <td>${badge}</td>
-            <td><div class="action-group">
+            <td data-label="No" class="row-num">${i+1}</td>
+            <td data-label="Nama"><strong>${escHtml(t.name)}</strong></td>
+            <td data-label="Mapel">${escHtml(t.subject)}</td>
+            <td data-label="Judul" title="${escHtml(t.title)}">${escHtml(t.title.length>38?t.title.slice(0,38)+'…':t.title)}</td>
+            <td data-label="File">${renderFileCell(t)}</td>
+            <td data-label="Dikumpulkan">${fmtDate(t.date)}</td>
+            <td data-label="Deadline">${fmtDate(t.deadline)}</td>
+            <td data-label="Status">${badge}</td>
+            <td data-label="Aksi"><div class="action-group">
                 <button class="btn-edit" data-id="${t.id}">Edit</button>
                 <button class="btn-delete" data-id="${t.id}">Hapus</button>
             </div></td>`;

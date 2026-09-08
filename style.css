@@ -1433,3 +1433,283 @@ tbody tr:last-child td { border-bottom: none; }
     padding-top: 1rem;
 }
 
+/* =============================================
+   RESPONSIVE — TABLET (≤ 1024px)
+   ============================================= */
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .bar-item {
+        grid-template-columns: 100px 1fr 36px;
+    }
+    .admin-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =============================================
+   RESPONSIVE — MOBILE (≤ 768px)
+   ============================================= */
+@media (max-width: 768px) {
+
+    /* ---- NAV ---- */
+    .topnav-inner {
+        padding: 0 1rem;
+        height: 56px;
+    }
+    .nav-logo-text { font-size: 1.1rem; }
+    .nav-text { display: none; }
+    .nav-link {
+        padding: 0.45rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    /* ---- PAGE HEADER ---- */
+    .page-header {
+        padding: 1.5rem 1rem 1.2rem;
+    }
+    .page-header h1 { font-size: 1.35rem; }
+    .page-header-class { font-size: 0.82rem; }
+    .page-header-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.85rem;
+    }
+    .mentor-chip {
+        align-self: flex-start;
+        padding: 0.45rem 0.75rem;
+    }
+
+    /* ---- CONTAINER ---- */
+    .container {
+        padding: 1rem 0.85rem 3rem;
+        gap: 1rem;
+    }
+
+    /* ---- CARDS ---- */
+    .card { padding: 1.1rem 1rem; }
+    .form-section { padding: 1.1rem 1rem; }
+    .card-header { margin-bottom: 1rem; }
+
+    /* ---- STATS GRID — 2 kolom di mobile ---- */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.7rem;
+    }
+    .stat-card {
+        padding: 1rem 0.9rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+    .stat-icon-wrap { width: 38px; height: 38px; font-size: 1.1rem; }
+    .stat-number { font-size: 1.55rem; }
+    .stat-label { font-size: 0.7rem; }
+
+    /* ---- FORM ---- */
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+    }
+    .form-group.span-2 { grid-column: span 1; }
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* ---- GUIDE STEPS ---- */
+    .guide-steps {
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+    .guide-banner { padding: 1rem 1.1rem; }
+    .guide-banner-header { margin-bottom: 0.75rem; }
+
+    /* ---- SEARCH BAR ---- */
+    .search-filter-bar {
+        flex-direction: column;
+        gap: 0.6rem;
+        align-items: stretch;
+        padding: 0.85rem;
+    }
+    .search-wrapper { min-width: unset; }
+    .filter-select { min-width: unset; width: 100%; }
+
+    /* ---- TABLE → CARD VIEW di mobile ---- */
+    .table-wrapper { overflow-x: unset; }
+    table, thead, tbody, th, td, tr { display: block; }
+    thead { display: none; } /* sembunyikan header tabel */
+    tbody tr {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        margin-bottom: 0.75rem;
+        padding: 0.85rem 1rem;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+    }
+    tbody tr:hover { background: #f8faff; }
+    td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.35rem 0;
+        border-bottom: 1px dashed #f1f5f9;
+        font-size: 0.83rem;
+        gap: 0.5rem;
+    }
+    td:last-child { border-bottom: none; }
+    td::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-width: 80px;
+    }
+    /* Action buttons di mobile */
+    .action-group {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    /* ---- TOAST ---- */
+    .toast-container {
+        bottom: 1rem;
+        right: 0.75rem;
+        left: 0.75rem;
+    }
+    .toast {
+        min-width: unset;
+        max-width: 100%;
+        width: 100%;
+        font-size: 0.82rem;
+    }
+
+    /* ---- MODAL ---- */
+    .modal {
+        padding: 1.5rem 1.2rem;
+        max-width: 95%;
+    }
+
+    /* ---- ADMIN HEADER ---- */
+    .admin-header-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    .admin-header-top > div:last-child {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .header-meta {
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+    .header-meta-item { font-size: 0.7rem; }
+
+    /* ---- SECTION HEADER ---- */
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .section-header > div:last-child {
+        width: 100%;
+        display: flex;
+        gap: 0.5rem;
+    }
+    .section-header .btn-sm { flex: 1; justify-content: center; }
+
+    /* ---- INFO STRIP ---- */
+    .info-strip {
+        font-size: 0.78rem;
+        padding: 0.65rem 0.85rem;
+    }
+
+    /* ---- SIGNATURE CARD ---- */
+    .sig-canvas-area { padding: 0.75rem 0; }
+    .sig-tools {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    canvas#sigCanvas {
+        width: 100% !important;
+        height: 160px !important;
+    }
+
+    /* ---- DONUT CHART ---- */
+    .donut-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    /* ---- BAR CHART ---- */
+    .bar-item {
+        grid-template-columns: 90px 1fr 32px;
+        gap: 0.5rem;
+    }
+    .bar-label { font-size: 0.73rem; }
+
+    /* ---- ADMIN GRID ---- */
+    .admin-grid { grid-template-columns: 1fr; }
+
+    /* ---- STUDENT LIST ---- */
+    .student-reg-form {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .student-reg-form input { width: 100%; }
+    .student-reg-form .btn { width: 100%; justify-content: center; }
+
+    /* ---- SUBMIT TYPE TOGGLE ---- */
+    .submit-type-toggle {
+        flex-direction: row;
+    }
+    .type-btn { flex: 1; justify-content: center; font-size: 0.8rem; }
+
+    /* ---- FILE DROPZONE ---- */
+    .dropzone { padding: 1.5rem 1rem; }
+
+    /* ---- RESULT COUNT BAR ---- */
+    .result-count-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    /* ---- BULK ACTION BAR ---- */
+    .bulk-bar {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+        padding: 0.75rem 1rem;
+    }
+    .bulk-bar .btn { width: 100%; justify-content: center; }
+}
+
+/* =============================================
+   RESPONSIVE — SMALL MOBILE (≤ 480px)
+   ============================================= */
+@media (max-width: 480px) {
+    /* Stats jadi 1 kolom di layar sangat kecil */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .stat-number { font-size: 1.35rem; }
+    .page-header h1 { font-size: 1.2rem; }
+    .card { padding: 0.9rem 0.85rem; }
+    .form-section { padding: 0.9rem 0.85rem; }
+}
