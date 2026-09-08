@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaskFlow — Pengumpulan Tugas RPL 1 &amp; RPL 2</title>
+    <meta name="description" content="Sistem pengumpulan tugas digital Kelas RPL 1 dan RPL 2. Mentor: Fauzi." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- TOP NAVIGATION -->
+    <nav class="topnav">
+        <div class="topnav-inner">
+            <a href="index.html" class="nav-logo">
+                <span class="nav-logo-icon">📚</span>
+                <span class="nav-logo-text">TaskFlow</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link active" id="navStudent">
+                    📝 <span class="nav-text">Form Siswa</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div class="page-header-top">
+                <div>
+                    <h1>📚 Pengumpulan Tugas Digital</h1>
+                    <p class="page-header-class">Kelas <strong>RPL 1</strong> &amp; <strong>RPL 2</strong></p>
+                </div>
+                <div class="mentor-chip">
+                    <div class="mentor-avatar">F</div>
+                    <div class="mentor-info">
+                        <div class="mentor-label">Mentor / Pengajar</div>
+                        <div class="mentor-name">Fauzi</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+
+        <!-- SIGNATURE DISPLAY (if mentor has signed) -->
+        <div class="sig-notice-card" id="sigNoticeCard" style="display:none;">
+            <div class="sig-notice-left">
+                <span class="sig-notice-icon">✍️</span>
+                <div>
+                    <div class="sig-notice-title">Tanda Tangan Mentor Tersedia</div>
+                    <div class="sig-notice-sub">Fauzi — Mentor Kelas RPL 1 &amp; RPL 2</div>
+                </div>
+            </div>
+            <button class="btn btn-outline btn-sm" id="btnViewSig">Lihat Tanda Tangan</button>
+        </div>
+
+        <!-- SIGNATURE MODAL (student view) -->
+        <div class="modal-overlay" id="sigModalOverlay" aria-hidden="true">
+            <div class="modal sig-modal">
+                <div class="modal-icon">✍️</div>
+                <h3>Tanda Tangan Mentor</h3>
+                <p class="sig-mentor-label">Fauzi &mdash; Mentor Kelas RPL 1 &amp; RPL 2</p>
+                <div class="sig-display-wrap">
+                    <img id="sigDisplayImg" src="" alt="Tanda Tangan Fauzi" class="sig-display-img" />
+                </div>
+                <button class="btn btn-ghost" id="btnCloseSigModal" style="margin-top:1rem;">Tutup</button>
+            </div>
+        </div>
+
+        <!-- STATS BAR -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card blue">
+                <div class="stat-icon-wrap">📦</div>
+                <div class="stat-body">
+                    <div class="stat-number" id="statTotal">0</div>
+                    <div class="stat-label">Total Tugas</div>
+                </div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon-wrap">✅</div>
+                <div class="stat-body">
+                    <div class="stat-number" id="statTepat">0</div>
+                    <div class="stat-label">Tepat Waktu</div>
+                </div>
+            </div>
+            <div class="stat-card red">
+                <div class="stat-icon-wrap">⏰</div>
+                <div class="stat-body">
+                    <div class="stat-number" id="statTerlambat">0</div>
+                    <div class="stat-label">Terlambat</div>
+                </div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-icon-wrap">👤</div>
+                <div class="stat-body">
+                    <div class="stat-number" id="statSiswa">0</div>
+                    <div class="stat-label">Siswa Unik</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORM SECTION -->
+        <section class="card form-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="card-title"><span class="icon">📋</span> Form Pengumpulan Tugas</h2>
+                    <p>Field dengan tanda <span class="required-mark">*</span> wajib diisi</p>
+                </div>
+            </div>
+
+            <form id="taskForm" novalidate>
+                <input type="hidden" id="editId" value="" />
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="inputName">Nama Lengkap <span class="required-mark">*</span></label>
+                        <input type="text" id="inputName" placeholder="Contoh: Budi Santoso" autocomplete="off" />
+                        <span class="field-error" id="errName"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputSubject">Mata Pelajaran / Kelas <span class="required-mark">*</span></label>
+                        <input type="text" id="inputSubject" placeholder="Contoh: Pemrograman Web - XI TKJ" autocomplete="off" />
+                        <span class="field-error" id="errSubject"></span>
+                    </div>
+                    <div class="form-group span-2">
+                        <label for="inputTitle">Judul Tugas <span class="required-mark">*</span></label>
+                        <input type="text" id="inputTitle" placeholder="Contoh: Tugas 1 — Membuat Form HTML" autocomplete="off" />
+                        <span class="field-error" id="errTitle"></span>
+                    </div>
+                    <div class="form-group span-2">
+                        <label>File / Link Tugas <span class="required-mark">*</span></label>
+
+                        <!-- Toggle: URL / Upload -->
+                        <div class="submit-type-toggle">
+                            <button type="button" class="type-btn active" id="typeBtnUrl" data-type="url">
+                                🔗 Link URL
+                            </button>
+                            <button type="button" class="type-btn" id="typeBtnFile" data-type="file">
+                                📁 Upload File
+                            </button>
+                        </div>
+
+                        <!-- URL input -->
+                        <div id="urlInputWrap">
+                            <input type="url" id="inputLink" placeholder="https://drive.google.com/ atau https://..." autocomplete="off" />
+                            <p class="input-hint">Tempel link Google Drive, OneDrive, Dropbox, GitHub, dsb.</p>
+                        </div>
+
+                        <!-- File Upload input -->
+                        <div id="fileInputWrap" style="display:none;">
+                            <div class="dropzone" id="dropzone">
+                                <div class="dropzone-icon" id="dropzoneIcon">📂</div>
+                                <div class="dropzone-text" id="dropzoneText">
+                                    <strong>Klik untuk pilih file</strong> atau seret file ke sini
+                                </div>
+                                <div class="dropzone-sub" id="dropzoneSub">
+                                    PDF, Word, Excel, PPT, gambar, ZIP &amp; lainnya • Maks. 4 MB
+                                </div>
+                                <input type="file" id="fileInput"
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z,.jpg,.jpeg,.png,.gif,.webp,.svg"
+                                    style="display:none;" />
+                            </div>
+                            <!-- File preview card -->
+                            <div class="file-preview" id="filePreview" style="display:none;">
+                                <div class="file-prev-icon" id="filePrevIcon">📄</div>
+                                <div class="file-prev-body">
+                                    <div class="file-prev-name" id="filePrevName"></div>
+                                    <div class="file-prev-meta" id="filePrevMeta"></div>
+                                </div>
+                                <button type="button" class="file-prev-remove" id="btnRemoveFile" title="Hapus file">✕</button>
+                            </div>
+                        </div>
+
+                        <span class="field-error" id="errLink"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputDate">Tanggal Pengumpulan <span class="required-mark">*</span></label>
+                        <input type="date" id="inputDate" />
+                        <span class="field-error" id="errDate"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputDeadline">Deadline <span class="required-mark">*</span></label>
+                        <input type="date" id="inputDeadline" />
+                        <span class="field-error" id="errDeadline"></span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="btnSubmit">
+                        🚀 <span id="btnLabel">Kumpulkan Tugas</span>
+                    </button>
+                    <button type="button" class="btn btn-danger-outline" id="btnCancel" style="display:none;">
+                        ✕ Batal Edit
+                    </button>
+                    <button type="reset" class="btn btn-ghost" id="btnReset">🔄 Reset</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- SEARCH & FILTER -->
+        <div class="search-filter-bar">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Cari nama, mata pelajaran, judul..." />
+                <button class="btn-clear" id="btnClearSearch">✕</button>
+            </div>
+            <select class="filter-select" id="filterStatus">
+                <option value="">Semua Status</option>
+                <option value="tepat">✅ Tepat Waktu</option>
+                <option value="terlambat">⏰ Terlambat</option>
+            </select>
+            <span class="result-count" id="resultCount">0 tugas</span>
+        </div>
+
+        <!-- TASK LIST -->
+        <section class="card" style="padding: 1.75rem;">
+            <div class="section-header">
+                <div>
+                    <h2 class="card-title"><span class="icon">📋</span> Daftar Tugas Terkumpul</h2>
+                </div>
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                    <button class="btn btn-danger-outline btn-sm" id="btnClearAll">🗑 Hapus Semua</button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="taskTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th data-sort="name">Nama ↕</th>
+                            <th data-sort="subject">Mata Pelajaran ↕</th>
+                            <th data-sort="title">Judul Tugas</th>
+                            <th>Link</th>
+                            <th data-sort="date">Tgl. Kumpul ↕</th>
+                            <th data-sort="deadline">Deadline ↕</th>
+                            <th data-sort="status">Status ↕</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskBody"></tbody>
+                </table>
+                <div class="empty-state" id="emptyState" style="display:none;">
+                    <div class="empty-icon">📭</div>
+                    <p>Belum ada tugas yang dikumpulkan.</p>
+                    <p class="empty-sub">Isi form di atas untuk mulai mengumpulkan tugas.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- TOAST -->
+    <div id="toastContainer" class="toast-container" role="alert" aria-live="polite"></div>
+
+    <!-- MODAL DELETE -->
+    <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+        <div class="modal">
+            <div class="modal-icon">⚠️</div>
+            <h3>Konfirmasi Hapus</h3>
+            <p id="modalMessage">Data ini akan dihapus permanen dan tidak bisa dikembalikan.</p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="btnConfirmDelete">Ya, Hapus</button>
+                <button class="btn btn-ghost" id="btnCancelDelete">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
