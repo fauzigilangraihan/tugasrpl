@@ -448,6 +448,7 @@ function showToast(type, icon, msg) {
     applyFilters();
     updateStats();
     initSigDisplay();
+    initSecretAdmin();
 })();
 
 /* ===================== SIGNATURE DISPLAY (STUDENT) ===================== */
@@ -487,4 +488,50 @@ function initSigDisplay() {
         if(e.target===sigModalOv) { sigModalOv.classList.remove('active'); }
     });
 }
+
+/* ===================== SECRET ADMIN ACCESS ===================== */
+function initSecretAdmin() {
+    // 1. Direct Secret Button in Top Nav (discreet icon 🛡️)
+    const secretBtn = document.getElementById('secretAdminBtn');
+    if (secretBtn) {
+        secretBtn.addEventListener('click', () => {
+            showToast('info', '🛡️', 'Mengalihkan ke Halaman Admin...');
+        });
+    }
+
+    // 2. Secret Multi-Click Trigger: Click Mentor avatar or chip 5 times rapidly
+    const mentorTarget = document.querySelector('.mentor-chip') || document.querySelector('.mentor-avatar');
+    if (mentorTarget) {
+        let clickCount = 0;
+        let clickTimer = null;
+        mentorTarget.style.cursor = 'pointer';
+
+        mentorTarget.addEventListener('click', () => {
+            clickCount++;
+            clearTimeout(clickTimer);
+
+            if (clickCount >= 5) {
+                clickCount = 0;
+                showToast('info', '🔓', 'Akses Rahasia Admin Terbuka!');
+                setTimeout(() => { window.location.href = 'admin.html'; }, 500);
+            } else if (clickCount >= 3) {
+                // Subtle hint for mentor
+                showToast('info', '🔑', `Klik ${5 - clickCount}x lagi untuk Admin`);
+                clickTimer = setTimeout(() => { clickCount = 0; }, 2500);
+            } else {
+                clickTimer = setTimeout(() => { clickCount = 0; }, 2000);
+            }
+        });
+    }
+
+    // 3. Secret Keyboard Shortcut: Ctrl + Shift + A or Alt + A
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') || (e.altKey && e.key.toLowerCase() === 'a')) {
+            e.preventDefault();
+            showToast('info', '🛡️', 'Akses Rahasia: Mengalihkan ke Admin...');
+            setTimeout(() => { window.location.href = 'admin.html'; }, 400);
+        }
+    });
+}
+
 

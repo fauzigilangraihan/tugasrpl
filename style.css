@@ -121,6 +121,27 @@ body {
 }
 .nav-link:hover { background: var(--accent-bg); color: var(--accent); }
 .nav-link.active { background: var(--accent-bg); color: var(--accent); }
+.secret-admin-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    opacity: 0.2;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.25rem;
+    outline: none;
+}
+.secret-admin-btn:hover {
+    opacity: 1;
+    background: var(--accent-bg);
+    color: var(--accent);
+}
 .nav-badge {
     background: var(--accent);
     color: white;
