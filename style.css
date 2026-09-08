@@ -6,21 +6,21 @@
 /* ---- CSS VARIABLES ---- */
 :root {
     /* Backgrounds */
-    --bg-base:        #f0f4ff;
+    --bg-base:        #f0fdf6;
     --bg-card:        #ffffff;
-    --bg-card-hover:  #f8faff;
-    --bg-sidebar:     #1e1b4b;
+    --bg-card-hover:  #f6fef9;
+    --bg-sidebar:     #064e3b;
 
     /* Borders */
-    --border:         #e2e8f0;
-    --border-focus:   #6366f1;
+    --border:         #d1fae5;
+    --border-focus:   #059669;
 
-    /* Accent */
-    --accent:         #6366f1;
-    --accent-light:   #818cf8;
-    --accent-dark:    #4338ca;
-    --accent-bg:      #eef2ff;
-    --accent-glow:    rgba(99, 102, 241, 0.2);
+    /* Accent — Emerald Green */
+    --accent:         #059669;
+    --accent-light:   #34d399;
+    --accent-dark:    #047857;
+    --accent-bg:      #ecfdf5;
+    --accent-glow:    rgba(5, 150, 105, 0.2);
 
     /* Semantic */
     --success:        #059669;
@@ -48,8 +48,8 @@
 
     /* Shadows */
     --shadow-sm:   0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
-    --shadow-md:   0 4px 16px rgba(99,102,241,0.08), 0 1px 4px rgba(0,0,0,0.06);
-    --shadow-lg:   0 12px 40px rgba(99,102,241,0.12), 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-md:   0 4px 16px rgba(5,150,105,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    --shadow-lg:   0 12px 40px rgba(5,150,105,0.14), 0 2px 8px rgba(0,0,0,0.06);
     --shadow-card: 0 2px 12px rgba(0,0,0,0.06);
 
     /* Transition */
@@ -101,7 +101,7 @@ body {
 .nav-logo-text {
     font-size: 1.3rem;
     font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    background: linear-gradient(135deg, #059669, #10b981);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -157,7 +157,7 @@ body {
    PAGE HEADER
    ========================================= */
 .page-header {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #a855f7 100%);
+    background: linear-gradient(135deg, #047857 0%, #059669 50%, #10b981 100%);
     padding: 3rem 1.5rem 2rem;
     color: white;
     position: relative;
@@ -304,10 +304,10 @@ body {
 .stat-trend.down { color: var(--danger); }
 
 /* Stat card color variants */
-.stat-card.blue   { --card-accent-color: #6366f1; --card-icon-bg: #eef2ff; }
-.stat-card.green  { --card-accent-color: #059669; --card-icon-bg: #ecfdf5; }
+.stat-card.blue   { --card-accent-color: #059669; --card-icon-bg: #ecfdf5; }
+.stat-card.green  { --card-accent-color: #10b981; --card-icon-bg: #d1fae5; }
 .stat-card.red    { --card-accent-color: #dc2626; --card-icon-bg: #fef2f2; }
-.stat-card.purple { --card-accent-color: #7c3aed; --card-icon-bg: #f5f3ff; }
+.stat-card.purple { --card-accent-color: #0d9488; --card-icon-bg: #ccfbf1; }
 
 /* =========================================
    SECTION HEADER
@@ -427,12 +427,12 @@ select {
 .btn:active { transform: scale(0.97); }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--accent), #7c3aed);
+    background: linear-gradient(135deg, #059669, #047857);
     color: #fff;
-    box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+    box-shadow: 0 4px 14px rgba(5,150,105,0.35);
 }
 .btn-primary:hover {
-    box-shadow: 0 6px 24px rgba(99,102,241,0.5);
+    box-shadow: 0 6px 24px rgba(5,150,105,0.5);
     transform: translateY(-1px);
 }
 .btn-secondary {
@@ -466,7 +466,7 @@ select {
 .btn-outline {
     background: transparent;
     color: var(--accent);
-    border: 1.5px solid rgba(99,102,241,0.4);
+    border: 1.5px solid rgba(5,150,105,0.4);
 }
 .btn-outline:hover { background: var(--accent-bg); }
 

@@ -81,7 +81,16 @@ function saveStudents() { localStorage.setItem(STUDENT_KEY, JSON.stringify(stude
 
 /* ===================== UTILITIES ===================== */
 function genId()      { return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
-function fmtDate(d)   { if(!d) return '—'; const [y,m,dy]=d.split('-'); return `${dy}/${m}/${y}`; }
+function fmtDate(d)   {
+    if(!d) return '—';
+    const dt = new Date(d);
+    if(isNaN(dt)) {
+        const [y,m,dy]=d.split('-');
+        return `${dy}/${m}/${y}`;
+    }
+    const pad = n => String(n).padStart(2,'0');
+    return `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+}
 function fmtDateTime(iso) {
     if(!iso) return '—';
     const d=new Date(iso);
@@ -608,6 +617,56 @@ function initAuthListeners() {
     }
 }
 
+/* ===================== GLOBAL DEADLINE MANAGEMENT ===================== */
+const DEADLINE_KEY = 'taskflow_global_deadline';
+
+function getGlobalDeadline() {
+    let dl = localStorage.getItem(DEADLINE_KEY);
+    if (!dl) {
+        const d = new Date();
+        d.setDate(d.getDate() + 7);
+        d.setHours(23, 59, 0, 0);
+        dl = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        localStorage.setItem(DEADLINE_KEY, dl);
+    }
+    return dl;
+}
+
+function initDeadlineAdmin() {
+    const deadlineInput = document.getElementById('adminDeadlineInput');
+    const btnSave       = document.getElementById('btnSaveDeadline');
+    const statusText    = document.getElementById('adminDeadlineStatus');
+    if (!deadlineInput) return;
+
+    deadlineInput.value = getGlobalDeadline();
+
+    function renderStatus() {
+        const val = deadlineInput.value || getGlobalDeadline();
+        if (statusText) {
+            const dt = new Date(val);
+            const formatted = isNaN(dt.getTime())
+                ? val
+                : dt.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ' jam ' + dt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+            statusText.textContent = `✓ Deadline Aktif Siswa: ${formatted}`;
+        }
+    }
+    renderStatus();
+
+    if (btnSave) {
+        btnSave.addEventListener('click', () => {
+            const val = deadlineInput.value;
+            if (!val) {
+                showToast('error', '⚠️', 'Pilih tanggal & waktu deadline yang valid.');
+                return;
+            }
+            localStorage.setItem(DEADLINE_KEY, val);
+            renderStatus();
+            showToast('success', '✅', 'Deadline tugas berhasil disimpan dan berlaku untuk seluruh siswa!');
+            window.dispatchEvent(new StorageEvent('storage', { key: DEADLINE_KEY }));
+        });
+    }
+}
+
 /* ===================== REFRESH ALL ===================== */
 function refreshAll() {
     loadTasks();
@@ -616,6 +675,7 @@ function refreshAll() {
     applyAdminFilters();
     updateStudentList();
     updateLastRefreshed();
+    initDeadlineAdmin();
 }
 
 /* ===================== INIT ===================== */
@@ -637,6 +697,7 @@ let lastTaskCount = -1; // track changes for polling
         applyAdminFilters();
         updateStudentList();
         initSignatureCanvas();
+        initDeadlineAdmin();
         updateLastRefreshed();
     }
 

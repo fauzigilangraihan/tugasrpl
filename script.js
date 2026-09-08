@@ -78,8 +78,23 @@ function saveTasks() { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 
 /* ===================== UTILITIES ===================== */
 function genId()    { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-function fmtDate(d) { if(!d) return '—'; const [y,m,dy]=d.split('-'); return `${dy}/${m}/${y}`; }
-function calcStatus(date, deadline) { return (!date||!deadline) ? 'unknown' : date<=deadline ? 'tepat' : 'terlambat'; }
+function fmtDate(d) {
+    if(!d) return '—';
+    // Handle datetime-local format: "2026-09-08T14:30"
+    const dt = new Date(d);
+    if(isNaN(dt)) {
+        // Fallback: old date-only format "YYYY-MM-DD"
+        const [y,m,dy] = d.split('-');
+        return `${dy}/${m}/${y}`;
+    }
+    const pad = n => String(n).padStart(2,'0');
+    return `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+}
+function calcStatus(date, deadline) {
+    if(!date || !deadline) return 'unknown';
+    // Compare as strings (ISO datetime-local or date both sort correctly)
+    return date <= deadline ? 'tepat' : 'terlambat';
+}
 function isValidUrl(s) { try { const u=new URL(s); return u.protocol==='http:'||u.protocol==='https:'; } catch{ return false; } }
 function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
 function fmtBytes(b) { if(b<1024) return b+'B'; if(b<1024*1024) return (b/1024).toFixed(1)+' KB'; return (b/(1024*1024)).toFixed(2)+' MB'; }
@@ -170,13 +185,45 @@ function resetFileUpload() {
 
 btnRemoveFile.addEventListener('click', resetFileUpload);
 
+/* ===================== GLOBAL DEADLINE MANAGEMENT ===================== */
+const DEADLINE_KEY = 'taskflow_global_deadline';
+
+function getGlobalDeadline() {
+    let dl = localStorage.getItem(DEADLINE_KEY);
+    if (!dl) {
+        const d = new Date();
+        d.setDate(d.getDate() + 7);
+        d.setHours(23, 59, 0, 0);
+        dl = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        localStorage.setItem(DEADLINE_KEY, dl);
+    }
+    return dl;
+}
+
+function updateStudentDeadlineDisplay() {
+    const dispEl = document.getElementById('studentDeadlineDisplayText');
+    const hiddenEl = document.getElementById('inputDeadline');
+    const dl = getGlobalDeadline();
+    if (hiddenEl) hiddenEl.value = dl;
+    if (dispEl) {
+        const dt = new Date(dl);
+        if (isNaN(dt.getTime())) {
+            dispEl.textContent = dl;
+        } else {
+            const dayStr = dt.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            const timeStr = dt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            dispEl.textContent = `${dayStr} • Jam ${timeStr} WIB`;
+        }
+    }
+}
+
 /* ===================== VALIDATION ===================== */
 function clearErrors() {
-    [fName,fSubject,fTitle,fLink,fDate,fDeadline].forEach(el => el.classList.remove('input-error'));
-    [errName,errSubject,errTitle,errLink,errDate,errDeadline].forEach(el => el.textContent='');
+    [fName,fSubject,fTitle,fLink].forEach(el => { if(el) el.classList.remove('input-error'); });
+    [errName,errSubject,errTitle,errLink].forEach(el => { if(el) el.textContent=''; });
 }
-function clearFieldError(field, errEl) { field.classList.remove('input-error'); errEl.textContent=''; }
-function setErr(field, errEl, msg) { field.classList.add('input-error'); errEl.textContent = msg; }
+function clearFieldError(field, errEl) { if(field) field.classList.remove('input-error'); if(errEl) errEl.textContent=''; }
+function setErr(field, errEl, msg) { if(field) field.classList.add('input-error'); if(errEl) errEl.textContent = msg; }
 
 function validateForm() {
     clearErrors();
@@ -189,11 +236,9 @@ function validateForm() {
         if(!fLink.value.trim())          { setErr(fLink,errLink,'Link tidak boleh kosong.'); ok=false; }
         else if(!isValidUrl(fLink.value.trim())) { setErr(fLink,errLink,'Masukkan URL valid (awali dengan https://).'); ok=false; }
     } else {
-        if(!selectedFileData)            { errLink.textContent='Pilih file terlebih dahulu.'; ok=false; }
+        if(!selectedFileData)            { if(errLink) errLink.textContent='Pilih file terlebih dahulu.'; ok=false; }
     }
 
-    if(!fDate.value)     { setErr(fDate,errDate,'Tanggal pengumpulan tidak boleh kosong.'); ok=false; }
-    if(!fDeadline.value) { setErr(fDeadline,errDeadline,'Deadline tidak boleh kosong.'); ok=false; }
     return ok;
 }
 
@@ -203,13 +248,18 @@ form.addEventListener('submit', e => {
     if(!validateForm()) { showToast('error','⚠️','Harap lengkapi semua field yang wajib diisi.'); return; }
 
     const isEdit = !!editIdField.value;
+    const now = new Date();
+    const nowLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+    const submitDate = (isEdit && fDate.value) ? fDate.value : nowLocal;
+    const activeDeadline = getGlobalDeadline();
+
     const data = {
         name:     fName.value.trim(),
         subject:  fSubject.value.trim(),
         title:    fTitle.value.trim(),
-        date:     fDate.value,
-        deadline: fDeadline.value,
-        status:   calcStatus(fDate.value, fDeadline.value),
+        date:     submitDate,        // auto-generated current timestamp "YYYY-MM-DDTHH:mm"
+        deadline: activeDeadline,    // set by mentor/admin
+        status:   calcStatus(submitDate, activeDeadline),
         submitMode,
     };
 
@@ -444,8 +494,11 @@ function showToast(type, icon, msg) {
 /* ===================== INIT ===================== */
 (function init(){
     loadTasks();
-    const today=new Date().toISOString().split('T')[0];
-    if(!fDate.value) fDate.value=today;
+    const now = new Date();
+    const nowLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+    if(!fDate.value) fDate.value = nowLocal;
+    updateStudentDeadlineDisplay();
+    window.addEventListener('storage', e => { if(e.key === DEADLINE_KEY) updateStudentDeadlineDisplay(); });
     applyFilters();
     updateStats();
     initSigDisplay();
