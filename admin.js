@@ -390,6 +390,21 @@ function renderAdminTable() {
             ? `<span class="badge badge-tepat">✓ Tepat Waktu</span>`
             : `<span class="badge badge-terlambat">⏰ Terlambat</span>`;
         const isSelected = selectedIds.has(t.id);
+
+        // Download button: file → download, URL → open in new tab
+        let downloadBtn = '';
+        if (t.submitMode === 'file' && t.fileData) {
+            downloadBtn = `<button class="btn-download-task btn-edit" data-id="${t.id}" title="Download file tugas ${escHtml(t.fileName || 'file')}" style="background:linear-gradient(135deg,#059669,#047857);color:white;border-color:#059669;display:inline-flex;align-items:center;gap:.3rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download
+            </button>`;
+        } else if (t.link) {
+            downloadBtn = `<a href="${escHtml(t.link)}" target="_blank" rel="noopener" class="btn-edit" title="Buka link tugas" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;display:inline-flex;align-items:center;gap:.3rem;text-decoration:none;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Buka Link
+            </a>`;
+        }
+
         const tr=document.createElement('tr');
         if(isSelected) tr.classList.add('selected');
         tr.innerHTML=`
@@ -408,8 +423,12 @@ function renderAdminTable() {
             <td>${fmtDate(t.deadline)}</td>
             <td>${badge}</td>
             <td class="no-print">
-                <div class="action-group">
-                    <button class="btn-delete" data-id="${t.id}">🗑 Hapus</button>
+                <div class="action-group" style="gap:.4rem;">
+                    ${downloadBtn}
+                    <button class="btn-delete" data-id="${t.id}" style="display:inline-flex;align-items:center;gap:.3rem;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                        Hapus
+                    </button>
                 </div>
             </td>`;
         tr.style.opacity='0'; tr.style.transform='translateY(4px)';
@@ -425,6 +444,10 @@ function renderAdminTable() {
 adminBody.addEventListener('click', e=>{
     const dl=e.target.closest('.btn-delete');
     if(dl) openModal('single',[dl.dataset.id]);
+
+    const dld=e.target.closest('.btn-download-task');
+    if(dld) adminDownloadFile(dld.dataset.id);
+
     const cb=e.target.closest('.row-check');
     if(cb) {
         const id=cb.dataset.id;
