@@ -1278,3 +1278,158 @@ tbody tr:last-child td { border-bottom: none; }
     .form-actions { flex-direction: column; width: 100%; }
     .form-actions .btn { width: 100%; justify-content: center; }
 }
+
+/* =========================================
+   SVG ICONS & UTILITIES
+   ========================================= */
+.svg-icon {
+    width: 1.1em;
+    height: 1.1em;
+    display: inline-block;
+    vertical-align: -0.15em;
+    stroke-width: 2;
+    stroke: currentColor;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+}
+.svg-icon.lg { width: 1.4em; height: 1.4em; }
+.svg-icon.sm { width: 0.9em; height: 0.9em; }
+
+/* Logout Button */
+.btn-logout {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 0.4rem 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all var(--transition);
+}
+.btn-logout:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+/* =========================================
+   ADMIN LOGIN MODAL & AUTH GATE
+   ========================================= */
+.login-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.login-modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.login-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem 2rem;
+    position: relative;
+    transform: translateY(20px) scale(0.96);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.login-modal-overlay.active .login-card {
+    transform: translateY(0) scale(1);
+}
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.login-icon-badge {
+    width: 56px;
+    height: 56px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+.login-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+.login-subtitle {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    margin-top: 0.35rem;
+}
+.login-alert {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.input-icon-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.input-icon-group .input-icon {
+    position: absolute;
+    left: 0.9rem;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+.input-icon-group input {
+    padding-left: 2.6rem;
+}
+.btn-toggle-pw {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+.btn-toggle-pw:hover { color: var(--text-primary); }
+
+.login-footer-hint {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+}
+

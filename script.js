@@ -86,26 +86,26 @@ function fmtBytes(b) { if(b<1024) return b+'B'; if(b<1024*1024) return (b/1024).
 
 /* ---- File type helpers ---- */
 const FILE_TYPES = {
-    pdf:  { icon:'📕', label:'PDF',   cls:'ftype-pdf'  },
-    doc:  { icon:'📘', label:'Word',  cls:'ftype-doc'  },
-    docx: { icon:'📘', label:'Word',  cls:'ftype-doc'  },
-    xls:  { icon:'📗', label:'Excel', cls:'ftype-xls'  },
-    xlsx: { icon:'📗', label:'Excel', cls:'ftype-xls'  },
-    ppt:  { icon:'📙', label:'PPT',   cls:'ftype-ppt'  },
-    pptx: { icon:'📙', label:'PPT',   cls:'ftype-ppt'  },
-    txt:  { icon:'📄', label:'TXT',   cls:'ftype-txt'  },
-    csv:  { icon:'📊', label:'CSV',   cls:'ftype-xls'  },
-    zip:  { icon:'🗜', label:'ZIP',   cls:'ftype-zip'  },
-    rar:  { icon:'🗜', label:'RAR',   cls:'ftype-zip'  },
-    '7z': { icon:'🗜', label:'7Z',    cls:'ftype-zip'  },
-    jpg:  { icon:'🖼', label:'JPG',   cls:'ftype-img'  },
-    jpeg: { icon:'🖼', label:'JPEG',  cls:'ftype-img'  },
-    png:  { icon:'🖼', label:'PNG',   cls:'ftype-img'  },
-    gif:  { icon:'🖼', label:'GIF',   cls:'ftype-img'  },
-    webp: { icon:'🖼', label:'WEBP',  cls:'ftype-img'  },
-    svg:  { icon:'🖼', label:'SVG',   cls:'ftype-img'  },
+    pdf:  { icon:'', label:'PDF',   cls:'ftype-pdf'  },
+    doc:  { icon:'', label:'DOC',   cls:'ftype-doc'  },
+    docx: { icon:'', label:'DOCX',  cls:'ftype-doc'  },
+    xls:  { icon:'', label:'XLS',   cls:'ftype-xls'  },
+    xlsx: { icon:'', label:'XLSX',  cls:'ftype-xls'  },
+    ppt:  { icon:'', label:'PPT',   cls:'ftype-ppt'  },
+    pptx: { icon:'', label:'PPTX',  cls:'ftype-ppt'  },
+    txt:  { icon:'', label:'TXT',   cls:'ftype-txt'  },
+    csv:  { icon:'', label:'CSV',   cls:'ftype-xls'  },
+    zip:  { icon:'', label:'ZIP',   cls:'ftype-zip'  },
+    rar:  { icon:'', label:'RAR',   cls:'ftype-zip'  },
+    '7z': { icon:'', label:'7Z',    cls:'ftype-zip'  },
+    jpg:  { icon:'', label:'JPG',   cls:'ftype-img'  },
+    jpeg: { icon:'', label:'JPEG',  cls:'ftype-img'  },
+    png:  { icon:'', label:'PNG',   cls:'ftype-img'  },
+    gif:  { icon:'', label:'GIF',   cls:'ftype-img'  },
+    webp: { icon:'', label:'WEBP',  cls:'ftype-img'  },
+    svg:  { icon:'', label:'SVG',   cls:'ftype-img'  },
 };
-function getFileType(ext='') { return FILE_TYPES[ext.toLowerCase()] || { icon:'📎', label:ext.toUpperCase()||'FILE', cls:'ftype-other' }; }
+function getFileType(ext='') { return FILE_TYPES[ext.toLowerCase()] || { icon:'', label:ext.toUpperCase()||'FILE', cls:'ftype-other' }; }
 function extOf(name='') { return name.includes('.') ? name.split('.').pop().toLowerCase() : ''; }
 
 /* ===================== SUBMIT MODE TOGGLE ===================== */
@@ -357,12 +357,12 @@ function renderFileCell(t) {
     if(t.submitMode==='file' && t.fileData) {
         const ft = getFileType(t.fileExt);
         return `<button class="task-link" style="background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;" onclick="downloadFile('${escHtml(t.id)}')" title="Download ${escHtml(t.fileName)}">
-            <span class="file-type-badge ${ft.cls}">${ft.icon} ${ft.label}</span>
+            <span class="file-type-badge ${ft.cls}">${ft.label}</span>
             <span style="font-size:.72rem;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(t.fileName)}</span>
         </button>`;
     }
     return `<a href="${escHtml(t.link)}" target="_blank" rel="noopener" class="task-link">
-        <span class="file-type-badge ftype-link">🔗 URL</span>
+        <span class="file-type-badge ftype-link">URL</span>
     </a>`;
 }
 
@@ -374,8 +374,8 @@ function renderTable() {
 
     filteredTasks.forEach((t,i) => {
         const badge = t.status==='tepat'
-            ? `<span class="badge badge-tepat">✓ Tepat Waktu</span>`
-            : `<span class="badge badge-terlambat">⏰ Terlambat</span>`;
+            ? `<span class="badge badge-tepat">Tepat Waktu</span>`
+            : `<span class="badge badge-terlambat">Terlambat</span>`;
         const tr = document.createElement('tr');
         tr.innerHTML=`
             <td class="row-num">${i+1}</td>
@@ -387,8 +387,8 @@ function renderTable() {
             <td>${fmtDate(t.deadline)}</td>
             <td>${badge}</td>
             <td><div class="action-group">
-                <button class="btn-edit" data-id="${t.id}">✏️ Edit</button>
-                <button class="btn-delete" data-id="${t.id}">🗑 Hapus</button>
+                <button class="btn-edit" data-id="${t.id}">Edit</button>
+                <button class="btn-delete" data-id="${t.id}">Hapus</button>
             </div></td>`;
         tr.style.opacity='0'; tr.style.transform='translateY(6px)';
         taskBody.appendChild(tr);
@@ -435,7 +435,8 @@ function animCount(el, target) {
 function showToast(type, icon, msg) {
     const t=document.createElement('div');
     t.className=`toast toast-${type}`;
-    t.innerHTML=`<span class="toast-icon">${icon}</span><span>${msg}</span>`;
+    const iconHtml = icon ? `<span class="toast-icon">${icon}</span>` : '';
+    t.innerHTML=`${iconHtml}<span>${msg}</span>`;
     toastContainer.appendChild(t);
     setTimeout(()=>{ t.classList.add('hide'); t.addEventListener('animationend',()=>t.remove(),{once:true}); }, 3500);
 }
@@ -491,11 +492,11 @@ function initSigDisplay() {
 
 /* ===================== SECRET ADMIN ACCESS ===================== */
 function initSecretAdmin() {
-    // 1. Direct Secret Button in Top Nav (discreet icon 🛡️)
+    // 1. Direct Secret Button in Top Nav (discreet icon)
     const secretBtn = document.getElementById('secretAdminBtn');
     if (secretBtn) {
         secretBtn.addEventListener('click', () => {
-            showToast('info', '🛡️', 'Mengalihkan ke Halaman Admin...');
+            showToast('info', '', 'Mengalihkan ke Halaman Admin...');
         });
     }
 
@@ -512,11 +513,11 @@ function initSecretAdmin() {
 
             if (clickCount >= 5) {
                 clickCount = 0;
-                showToast('info', '🔓', 'Akses Rahasia Admin Terbuka!');
+                showToast('info', '', 'Akses Rahasia Admin Terbuka!');
                 setTimeout(() => { window.location.href = 'admin.html'; }, 500);
             } else if (clickCount >= 3) {
                 // Subtle hint for mentor
-                showToast('info', '🔑', `Klik ${5 - clickCount}x lagi untuk Admin`);
+                showToast('info', '', `Klik ${5 - clickCount}x lagi untuk Admin`);
                 clickTimer = setTimeout(() => { clickCount = 0; }, 2500);
             } else {
                 clickTimer = setTimeout(() => { clickCount = 0; }, 2000);
@@ -528,7 +529,7 @@ function initSecretAdmin() {
     document.addEventListener('keydown', e => {
         if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') || (e.altKey && e.key.toLowerCase() === 'a')) {
             e.preventDefault();
-            showToast('info', '🛡️', 'Akses Rahasia: Mengalihkan ke Admin...');
+            showToast('info', '', 'Akses Rahasia: Mengalihkan ke Admin...');
             setTimeout(() => { window.location.href = 'admin.html'; }, 400);
         }
     });

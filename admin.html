@@ -33,18 +33,14 @@
         .pill-notsubmit  { background:#fef2f2; color:#dc2626; border:1px solid #fca5a5; border-radius:99px; padding:.2rem .65rem; font-size:.72rem; font-weight:700; }
         .pill-late       { background:#fffbeb; color:#d97706; border:1px solid #fcd34d; border-radius:99px; padding:.2rem .65rem; font-size:.72rem; font-weight:700; }
 
-        /* Export/Print toolbar */
         .toolbar { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
 
-        /* Timeline / recent activity */
+        /* Activity */
         .activity-list { display:flex; flex-direction:column; gap:0; }
         .activity-item {
-            display:grid;
-            grid-template-columns:36px 1fr;
-            gap:.75rem;
-            padding:.7rem 0;
-            border-bottom:1px solid #f1f5f9;
-            align-items:start;
+            display:grid; grid-template-columns:36px 1fr;
+            gap:.75rem; padding:.7rem 0;
+            border-bottom:1px solid #f1f5f9; align-items:start;
         }
         .activity-item:last-child { border-bottom:none; }
         .act-avatar {
@@ -57,11 +53,8 @@
         .act-title { font-size:.84rem; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .act-sub   { font-size:.74rem; color:var(--text-muted); margin-top:.1rem; }
         .act-time  { font-size:.7rem; color:var(--text-muted); margin-top:.2rem; }
-
-        /* Donut SVG fix */
         svg.donut { overflow:visible; }
 
-        /* Report table print */
         @media print {
             .topnav, .page-header, .toolbar, .action-group,
             .btn, .search-filter-bar, #btnDeleteSel,
@@ -70,132 +63,538 @@
             .card { box-shadow:none; border:1px solid #ddd; }
             table { font-size:11px; }
         }
-
-        /* Row selected highlight */
         tr.selected td { background:#eef2ff !important; }
         .bulk-bar {
-            background: var(--accent);
-            color:white;
-            border-radius:var(--radius-sm);
-            padding:.5rem 1rem;
-            font-size:.82rem;
-            font-weight:600;
-            display:none;
-            align-items:center;
-            gap:.75rem;
+            background: var(--accent); color:white;
+            border-radius:var(--radius-sm); padding:.5rem 1rem;
+            font-size:.82rem; font-weight:600;
+            display:none; align-items:center; gap:.75rem;
         }
         .bulk-bar.show { display:flex; }
-
-        /* Admin page header extra */
-        .header-meta {
-            display:flex; gap:1rem; margin-top:.75rem; flex-wrap:wrap;
-        }
+        .header-meta { display:flex; gap:1rem; margin-top:.75rem; flex-wrap:wrap; }
         .header-meta-item {
-            background:rgba(255,255,255,.15);
-            border:1px solid rgba(255,255,255,.2);
-            border-radius:var(--radius-sm);
-            padding:.35rem .85rem;
-            font-size:.78rem;
-            font-weight:500;
-            display:flex; align-items:center; gap:.4rem;
-        }
-
-        /* Notification dot */
-        .notif-dot {
-            display:inline-block; width:8px; height:8px;
-            background:var(--danger); border-radius:50%;
-            margin-left:4px; animation:blink 1.5s ease infinite;
+            background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2);
+            border-radius:var(--radius-sm); padding:.35rem .85rem;
+            font-size:.78rem; font-weight:500; display:flex; align-items:center; gap:.4rem;
         }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-        /* Refresh button in header */
         .btn-refresh-header {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.35);
+            background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.35);
+            color: white; border-radius: var(--radius-sm); padding: 0.35rem 0.9rem;
+            font-size: 0.78rem; font-weight: 600; font-family: var(--font);
+            cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.3rem;
+        }
+        .btn-refresh-header:hover { background: rgba(255,255,255,0.3); }
+
+        /* =============================================
+           AUTH GATE — Premium Split-Screen Login
+           ============================================= */
+        #authGate {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            min-height: 100vh;
+            background: #f8faff;
+            font-family: var(--font);
+            transition: opacity 0.3s ease;
+        }
+        #authGate.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* ── Left Branding Panel ── */
+        .auth-left {
+            flex: 0 0 44%;
+            background: linear-gradient(150deg, #312e81 0%, #4f46e5 50%, #7c3aed 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 2.5rem 3rem;
             color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-left::after {
+            content: '';
+            position: absolute;
+            width: 400px; height: 400px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            bottom: -120px; right: -100px;
+            pointer-events: none;
+        }
+        .auth-left::before {
+            content: '';
+            position: absolute;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            top: 40px; right: 40px;
+            pointer-events: none;
+        }
+        .auth-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+        .auth-brand-logo {
+            width: 42px; height: 42px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .auth-brand-name {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        .auth-left-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            padding: 2rem 0;
+        }
+        .auth-tagline {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            opacity: 0.6;
+            margin-bottom: 0.75rem;
+        }
+        .auth-left-title {
+            font-size: 2.1rem;
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+        }
+        .auth-left-desc {
+            font-size: 0.88rem;
+            opacity: 0.75;
+            line-height: 1.65;
+            max-width: 300px;
+            margin-bottom: 2.25rem;
+        }
+        .auth-features {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .auth-feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.82rem;
+            opacity: 0.85;
+        }
+        .auth-feature-icon {
+            width: 28px; height: 28px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .auth-left-footer {
+            position: relative;
+            z-index: 1;
+            font-size: 0.72rem;
+            opacity: 0.4;
+        }
+
+        /* ── Right Form Panel ── */
+        .auth-right {
+            flex: 1;
+            background: #f8faff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2.5rem;
+            overflow-y: auto;
+        }
+        .auth-form-wrap {
+            width: 100%;
+            max-width: 380px;
+        }
+        .auth-form-eyebrow {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        .auth-form-title {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            margin-bottom: 0.4rem;
+        }
+        .auth-form-sub {
+            font-size: 0.83rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        /* Alert box */
+        .auth-alert {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.7rem 0.9rem;
             border-radius: var(--radius-sm);
-            padding: 0.35rem 0.9rem;
-            font-size: 0.78rem;
+            margin-bottom: 1.25rem;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            animation: authAlertIn 0.2s ease;
+        }
+        .auth-alert.show { display: flex; }
+        @keyframes authAlertIn {
+            from { opacity:0; transform: translateY(-4px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+
+        /* Form fields */
+        .auth-field {
+            margin-bottom: 1.1rem;
+        }
+        .auth-field label {
+            display: block;
+            font-size: 0.81rem;
             font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+        .auth-input-wrap {
+            position: relative;
+        }
+        .auth-input-icon {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            display: flex;
+            pointer-events: none;
+        }
+        .auth-input-wrap input {
+            width: 100%;
+            padding: 0.72rem 2.8rem 0.72rem 2.65rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-family: var(--font);
+            background: #fff;
+            color: var(--text-primary);
+            transition: border-color 0.18s, box-shadow 0.18s;
+            outline: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .auth-input-wrap input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .auth-input-wrap input::placeholder {
+            color: #c4c9d4;
+        }
+        .auth-toggle-pw {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.2rem;
+            display: flex;
+            align-items: center;
+            border-radius: 4px;
+            transition: color 0.15s;
+        }
+        .auth-toggle-pw:hover { color: var(--text-secondary); }
+
+        /* Submit */
+        .auth-btn {
+            width: 100%;
+            padding: 0.82rem 1.5rem;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.92rem;
+            font-weight: 700;
             font-family: var(--font);
             cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 0.3rem;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.75rem;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+            letter-spacing: 0.01em;
         }
-        .btn-refresh-header:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.05);
+        .auth-btn:hover {
+            box-shadow: 0 6px 22px rgba(79, 70, 229, 0.42);
+            transform: translateY(-1px);
         }
-        .btn-refresh-header:active { transform: scale(0.97); }
+        .auth-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Footer */
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1.5rem 0 0;
+        }
+        .auth-divider hr {
+            flex: 1; border: none; border-top: 1px solid var(--border);
+        }
+        .auth-divider span {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        .auth-note {
+            margin-top: 1rem;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.55;
+        }
+        .auth-note strong {
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 800px) {
+            .auth-left { display: none; }
+            .auth-right { padding: 2.5rem 1.5rem; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- ========================================
+         AUTH GATE — Full-Screen Login
+         Shown when unauthenticated, hides dashboard
+         ======================================== -->
+    <div id="authGate">
+        <!-- Left: Branding Panel -->
+        <div class="auth-left">
+            <div class="auth-brand">
+                <div class="auth-brand-logo">
+                    <svg class="svg-icon" viewBox="0 0 24 24" style="color:white;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <span class="auth-brand-name">TaskFlow</span>
+            </div>
+
+            <div class="auth-left-body">
+                <p class="auth-tagline">Panel Administrasi</p>
+                <h2 class="auth-left-title">Kelola Tugas<br>Siswa dengan Mudah</h2>
+                <p class="auth-left-desc">Platform pengumpulan tugas digital Kelas RPL 1 &amp; RPL 2. Pantau, analisis, dan ekspor data pengumpulan secara real-time.</p>
+
+                <div class="auth-features">
+                    <div class="auth-feature-item">
+                        <div class="auth-feature-icon">
+                            <svg class="svg-icon sm" viewBox="0 0 24 24" style="color:white;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        </div>
+                        <span>Statistik pengumpulan real-time</span>
+                    </div>
+                    <div class="auth-feature-item">
+                        <div class="auth-feature-icon">
+                            <svg class="svg-icon sm" viewBox="0 0 24 24" style="color:white;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                        <span>Manajemen siswa terdaftar</span>
+                    </div>
+                    <div class="auth-feature-item">
+                        <div class="auth-feature-icon">
+                            <svg class="svg-icon sm" viewBox="0 0 24 24" style="color:white;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        </div>
+                        <span>Tanda tangan digital mentor</span>
+                    </div>
+                    <div class="auth-feature-item">
+                        <div class="auth-feature-icon">
+                            <svg class="svg-icon sm" viewBox="0 0 24 24" style="color:white;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </div>
+                        <span>Export laporan CSV &amp; print</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-left-footer">
+                &copy; 2024 TaskFlow · Kelas RPL 1 &amp; RPL 2
+            </div>
+        </div>
+
+        <!-- Right: Login Form Panel -->
+        <div class="auth-right">
+            <div class="auth-form-wrap">
+                <p class="auth-form-eyebrow">Akses Terbatas</p>
+                <h1 class="auth-form-title">Masuk ke<br>Dashboard</h1>
+                <p class="auth-form-sub">Gunakan kredensial pengajar yang telah ditetapkan.</p>
+
+                <!-- Error Alert -->
+                <div id="loginAlert" class="auth-alert">
+                    <svg class="svg-icon sm" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <span id="loginAlertText">Username atau password salah.</span>
+                </div>
+
+                <form id="adminLoginForm" onsubmit="return false;" autocomplete="on">
+                    <!-- Username -->
+                    <div class="auth-field">
+                        <label for="adminUsername">Username</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon">
+                                <svg class="svg-icon sm" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            </span>
+                            <input
+                                type="text"
+                                id="adminUsername"
+                                placeholder="admin atau fauzi"
+                                autocomplete="username"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="auth-field">
+                        <label for="adminPassword">Password</label>
+                        <div class="auth-input-wrap">
+                            <span class="auth-input-icon">
+                                <svg class="svg-icon sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            </span>
+                            <input
+                                type="password"
+                                id="adminPassword"
+                                placeholder="Masukkan password"
+                                autocomplete="current-password"
+                                required
+                            />
+                            <button type="button" class="auth-toggle-pw" id="btnTogglePw" title="Tampilkan password">
+                                <svg class="svg-icon sm" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="auth-btn">
+                        <span>Masuk ke Dashboard</span>
+                        <svg class="svg-icon sm" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                    </button>
+                </form>
+
+                <div class="auth-divider">
+                    <hr /><span>Akses Eksklusif</span><hr />
+                </div>
+                <p class="auth-note">
+                    Halaman ini hanya untuk <strong>Mentor Fauzi</strong>.<br>
+                    Siswa tidak diizinkan mengakses panel ini.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+         DASHBOARD (hidden until auth)
+         ======================================== -->
 
     <!-- TOP NAVIGATION -->
     <nav class="topnav">
         <div class="topnav-inner">
             <a href="index.html" class="nav-logo">
-                <span class="nav-logo-icon">📚</span>
+                <svg class="svg-icon lg" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                 <span class="nav-logo-text">TaskFlow</span>
             </a>
             <div class="nav-links">
                 <a href="index.html" class="nav-link">
-                    📝 <span class="nav-text">Form Siswa</span>
+                    <svg class="svg-icon sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span class="nav-text">Form Siswa</span>
                 </a>
                 <a href="admin.html" class="nav-link active">
-                    🛡 <span class="nav-text">Dashboard Admin</span>
+                    <svg class="svg-icon sm" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <span class="nav-text">Dashboard Admin</span>
                 </a>
             </div>
         </div>
     </nav>
 
     <!-- PAGE HEADER -->
-    <div class="page-header">
+    <div class="page-header" id="adminMainContent" style="display:none;">
         <div class="page-header-inner">
             <div class="page-header-top">
                 <div>
-                    <h1>🛡 Dashboard Admin — RPL 1 &amp; RPL 2</h1>
+                    <h1>Dashboard Admin — Kelas RPL 1 &amp; RPL 2</h1>
                     <p>Pantau dan kelola semua tugas yang dikumpulkan siswa secara real-time.</p>
                 </div>
-                <div class="mentor-chip">
-                    <div class="mentor-avatar">F</div>
-                    <div class="mentor-info">
-                        <div class="mentor-label">Login sebagai</div>
-                        <div class="mentor-name">Fauzi — Mentor</div>
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <div class="mentor-chip">
+                        <div class="mentor-avatar">F</div>
+                        <div class="mentor-info">
+                            <div class="mentor-label">Login sebagai</div>
+                            <div class="mentor-name">Fauzi — Mentor</div>
+                        </div>
                     </div>
+                    <button class="btn-logout" id="btnLogoutAdmin" title="Keluar dari Panel Admin">
+                        <svg class="svg-icon sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <span>Keluar</span>
+                    </button>
                 </div>
             </div>
             <div class="header-meta">
-                <div class="header-meta-item">📅 <span id="headerDate">—</span></div>
-                <div class="header-meta-item">🕐 <span id="headerTime">—</span></div>
-                <div class="header-meta-item">💾 Data localStorage</div>
-                <div class="header-meta-item">🔁 Update: <span id="lastRefreshed">—</span></div>
-                <div class="header-meta-item" id="sigStatus">✍️ TTD: <span id="sigStatusText">Belum ada</span></div>
-                <button class="btn-refresh-header" id="btnRefresh" title="Refresh data sekarang">🔄 Refresh</button>
+                <div class="header-meta-item">
+                    <svg class="svg-icon sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span id="headerDate">—</span>
+                </div>
+                <div class="header-meta-item">
+                    <svg class="svg-icon sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span id="headerTime">—</span>
+                </div>
+                <div class="header-meta-item">Storage Local</div>
+                <div class="header-meta-item">Update: <span id="lastRefreshed">—</span></div>
+                <div class="header-meta-item" id="sigStatus">TTD Mentor: <span id="sigStatusText">Belum ada</span></div>
+                <button class="btn-refresh-header" id="btnRefresh" title="Refresh data sekarang">
+                    <svg class="svg-icon sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                    Refresh
+                </button>
             </div>
         </div>
     </div>
 
-    <main class="container">
+    <main class="container" id="adminDashboardContent" style="display:none;">
 
         <!-- SIGNATURE CANVAS CARD -->
         <div class="card sig-card">
             <div class="card-header">
                 <div>
-                    <div class="card-title"><span class="icon">✍️</span> Tanda Tangan Digital — Fauzi</div>
+                    <div class="card-title">Tanda Tangan Digital — Fauzi</div>
                     <div class="card-subtitle">Buat atau perbarui tanda tangan Anda. Tanda tangan akan tampil di halaman siswa.</div>
                 </div>
                 <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
                     <div class="sig-status-pill" id="sigStatusPill">Belum Ada</div>
-                    <button class="btn btn-danger-outline btn-sm" id="btnClearSig">🗑 Hapus</button>
-                    <button class="btn btn-primary btn-sm" id="btnSaveSig">💾 Simpan Tanda Tangan</button>
+                    <button class="btn btn-danger-outline btn-sm" id="btnClearSig">Hapus</button>
+                    <button class="btn btn-primary btn-sm" id="btnSaveSig">Simpan Tanda Tangan</button>
                 </div>
             </div>
 
             <div class="sig-canvas-area">
-                <!-- Pen Tools -->
                 <div class="sig-tools">
                     <div class="sig-tool-group">
                         <span class="sig-tool-label">Warna:</span>
@@ -211,20 +610,16 @@
                         <button class="sig-size-btn" data-size="7" title="Tebal"><span style="width:12px;height:7px;background:currentColor;display:block;"></span></button>
                     </div>
                     <div class="sig-tool-group">
-                        <button class="btn btn-ghost btn-sm" id="btnUndoSig">↩ Undo</button>
-                        <button class="btn btn-ghost btn-sm" id="btnEraseSig" id="btnEraseSig">💯 Hapus Semua</button>
+                        <button class="btn btn-ghost btn-sm" id="btnUndoSig">Undo</button>
+                        <button class="btn btn-ghost btn-sm" id="btnEraseSig">Hapus Semua</button>
                     </div>
                 </div>
-
-                <!-- Canvas -->
                 <div class="sig-canvas-wrap">
                     <canvas id="sigCanvas" width="700" height="220"></canvas>
                     <div class="sig-canvas-hint" id="sigCanvasHint">Tanda tangani di sini ↓</div>
                 </div>
-
-                <!-- Preview (shown after save) -->
                 <div class="sig-saved-preview" id="sigSavedPreview" style="display:none;">
-                    <div class="sig-preview-label">✓ Tanda tangan tersimpan — ditampilkan ke siswa</div>
+                    <div class="sig-preview-label">Tanda tangan tersimpan — ditampilkan ke siswa</div>
                     <img id="sigPreviewImg" src="" alt="Tanda Tangan Tersimpan" class="sig-preview-img" />
                 </div>
             </div>
@@ -233,7 +628,9 @@
         <!-- KPI STATS -->
         <div class="stats-grid" id="statsGrid">
             <div class="stat-card blue">
-                <div class="stat-icon-wrap">📦</div>
+                <div class="stat-icon-wrap">
+                    <svg class="svg-icon lg" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                </div>
                 <div class="stat-body">
                     <div class="stat-number" id="statTotal">0</div>
                     <div class="stat-label">Total Tugas</div>
@@ -241,7 +638,9 @@
                 </div>
             </div>
             <div class="stat-card green">
-                <div class="stat-icon-wrap">✅</div>
+                <div class="stat-icon-wrap">
+                    <svg class="svg-icon lg" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
                 <div class="stat-body">
                     <div class="stat-number" id="statTepat">0</div>
                     <div class="stat-label">Tepat Waktu</div>
@@ -249,7 +648,9 @@
                 </div>
             </div>
             <div class="stat-card red">
-                <div class="stat-icon-wrap">⏰</div>
+                <div class="stat-icon-wrap">
+                    <svg class="svg-icon lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
                 <div class="stat-body">
                     <div class="stat-number" id="statTerlambat">0</div>
                     <div class="stat-label">Terlambat</div>
@@ -257,7 +658,9 @@
                 </div>
             </div>
             <div class="stat-card purple">
-                <div class="stat-icon-wrap">👥</div>
+                <div class="stat-icon-wrap">
+                    <svg class="svg-icon lg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
                 <div class="stat-body">
                     <div class="stat-number" id="statSiswa">0</div>
                     <div class="stat-label">Siswa Unik</div>
@@ -267,12 +670,11 @@
 
         <!-- ROW: CHARTS -->
         <div class="admin-grid">
-
-            <!-- Donut Chart: Status Ratio -->
+            <!-- Donut Chart -->
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <div class="card-title"><span class="icon">📊</span> Rasio Status Pengumpulan</div>
+                        <div class="card-title">Rasio Status Pengumpulan</div>
                         <div class="card-subtitle">Tepat waktu vs terlambat</div>
                     </div>
                 </div>
@@ -280,15 +682,11 @@
                     <svg class="donut" width="120" height="120" viewBox="0 0 120 120" id="donutSvg">
                         <circle cx="60" cy="60" r="45" fill="none" stroke="#f1f5f9" stroke-width="18"/>
                         <circle class="donut-tepat" cx="60" cy="60" r="45" fill="none"
-                            stroke="#059669" stroke-width="18"
-                            stroke-dasharray="0 283"
-                            stroke-dashoffset="71"
+                            stroke="#059669" stroke-width="18" stroke-dasharray="0 283" stroke-dashoffset="71"
                             stroke-linecap="round"
                             style="transition:stroke-dasharray .8s cubic-bezier(.4,0,.2,1);transform:rotate(-90deg);transform-origin:60px 60px" />
                         <circle class="donut-terlambat" cx="60" cy="60" r="45" fill="none"
-                            stroke="#dc2626" stroke-width="18"
-                            stroke-dasharray="0 283"
-                            stroke-dashoffset="71"
+                            stroke="#dc2626" stroke-width="18" stroke-dasharray="0 283" stroke-dashoffset="71"
                             stroke-linecap="round"
                             style="transition:stroke-dasharray .8s cubic-bezier(.4,0,.2,1) .1s;transform:rotate(-90deg);transform-origin:60px 60px" />
                         <text x="60" y="55" text-anchor="middle" font-size="14" font-weight="800" fill="#1e293b" font-family="Inter,sans-serif" id="donutCenter">0%</text>
@@ -327,13 +725,12 @@
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <div class="card-title"><span class="icon">🕐</span> Aktivitas Terbaru</div>
+                        <div class="card-title">Aktivitas Terbaru</div>
                         <div class="card-subtitle">10 tugas terakhir yang dikumpulkan</div>
                     </div>
                 </div>
                 <div class="activity-list" id="activityList">
                     <div class="empty-state" style="padding:2rem 0;">
-                        <div class="empty-icon">📭</div>
                         <p>Belum ada aktivitas.</p>
                     </div>
                 </div>
@@ -344,7 +741,7 @@
         <div class="card">
             <div class="card-header">
                 <div>
-                    <div class="card-title"><span class="icon">📚</span> Tugas per Mata Pelajaran</div>
+                    <div class="card-title">Tugas per Mata Pelajaran</div>
                     <div class="card-subtitle">Distribusi jumlah tugas berdasarkan mata pelajaran</div>
                 </div>
             </div>
@@ -357,12 +754,11 @@
 
         <!-- ROW: Student Management + Status -->
         <div class="admin-grid">
-
             <!-- Daftar Siswa Terdaftar -->
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <div class="card-title"><span class="icon">👥</span> Manajemen Siswa Terdaftar</div>
+                        <div class="card-title">Manajemen Siswa Terdaftar</div>
                         <div class="card-subtitle">Tambah nama siswa untuk memantau siapa yang belum mengumpulkan</div>
                     </div>
                 </div>
@@ -373,7 +769,6 @@
                 </div>
                 <div class="student-list" id="studentList">
                     <div class="empty-state" style="padding:1.5rem 0;">
-                        <div class="empty-icon" style="font-size:2rem;">👤</div>
                         <p>Belum ada siswa terdaftar.</p>
                         <p class="empty-sub">Tambah nama siswa di atas untuk memantau status pengumpulan.</p>
                     </div>
@@ -384,7 +779,7 @@
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <div class="card-title"><span class="icon">📋</span> Rekap per Mata Pelajaran</div>
+                        <div class="card-title">Rekap per Mata Pelajaran</div>
                         <div class="card-subtitle">Persentase pengumpulan per mapel</div>
                     </div>
                 </div>
@@ -400,27 +795,27 @@
         <div class="card">
             <div class="card-header">
                 <div>
-                    <div class="card-title"><span class="icon">📋</span> Semua Tugas Terkumpul</div>
+                    <div class="card-title">Semua Tugas Terkumpul</div>
                     <div class="card-subtitle">Kelola dan ekspor data pengumpulan tugas</div>
                 </div>
                 <div class="toolbar no-print">
-                    <button class="btn btn-success btn-sm" id="btnExportCSV">⬇ Export CSV</button>
-                    <button class="btn btn-outline btn-sm" id="btnPrint">🖨 Print</button>
-                    <button class="btn btn-danger-outline btn-sm" id="btnDeleteAll">🗑 Hapus Semua</button>
+                    <button class="btn btn-success btn-sm" id="btnExportCSV">Export CSV</button>
+                    <button class="btn btn-outline btn-sm" id="btnPrint">Print Data</button>
+                    <button class="btn btn-danger-outline btn-sm" id="btnDeleteAll">Hapus Semua</button>
                 </div>
             </div>
 
             <!-- Bulk bar -->
             <div class="bulk-bar no-print" id="bulkBar">
                 <span id="bulkCount">0 dipilih</span>
-                <button class="btn btn-danger btn-xs" id="btnDeleteSelected">🗑 Hapus Terpilih</button>
-                <button class="btn btn-ghost btn-xs" id="btnDeselectAll">✕ Batal</button>
+                <button class="btn btn-danger btn-xs" id="btnDeleteSelected">Hapus Terpilih</button>
+                <button class="btn btn-ghost btn-xs" id="btnDeselectAll">Batal</button>
             </div>
 
             <!-- Search & filter -->
             <div class="search-filter-bar no-print" style="margin-bottom:1rem;">
                 <div class="search-wrapper">
-                    <span class="search-icon">🔍</span>
+                    <svg class="svg-icon sm search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <input type="text" id="adminSearch" placeholder="Cari nama, mata pelajaran, judul..." />
                     <button class="btn-clear" id="adminClearSearch">✕</button>
                 </div>
@@ -429,8 +824,8 @@
                 </select>
                 <select class="filter-select" id="adminFilterStatus">
                     <option value="">Semua Status</option>
-                    <option value="tepat">✅ Tepat Waktu</option>
-                    <option value="terlambat">⏰ Terlambat</option>
+                    <option value="tepat">Tepat Waktu</option>
+                    <option value="terlambat">Terlambat</option>
                 </select>
                 <span class="result-count" id="adminResultCount">0 tugas</span>
             </div>
@@ -444,7 +839,7 @@
                             <th data-sort="name">Nama ↕</th>
                             <th data-sort="subject">Mata Pelajaran ↕</th>
                             <th data-sort="title">Judul Tugas</th>
-                            <th>Link</th>
+                            <th>Link / File</th>
                             <th data-sort="date">Tgl. Kumpul ↕</th>
                             <th data-sort="deadline">Deadline ↕</th>
                             <th data-sort="status">Status ↕</th>
@@ -454,7 +849,6 @@
                     <tbody id="adminBody"></tbody>
                 </table>
                 <div class="empty-state" id="adminEmpty" style="display:none;">
-                    <div class="empty-icon">📭</div>
                     <p>Tidak ada tugas ditemukan.</p>
                     <p class="empty-sub">Coba ubah filter atau kata kunci pencarian.</p>
                 </div>
@@ -469,7 +863,6 @@
     <!-- MODAL -->
     <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
         <div class="modal">
-            <div class="modal-icon">⚠️</div>
             <h3 id="modalTitle">Konfirmasi Hapus</h3>
             <p id="modalMessage">Data akan dihapus permanen.</p>
             <div class="modal-actions">

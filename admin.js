@@ -10,26 +10,26 @@ const CIRC         = 2 * Math.PI * 45;
 
 /* ---- File type helpers ---- */
 const FILE_TYPES = {
-    pdf:  { icon:'📕', label:'PDF',   cls:'ftype-pdf'  },
-    doc:  { icon:'📘', label:'Word',  cls:'ftype-doc'  },
-    docx: { icon:'📘', label:'Word',  cls:'ftype-doc'  },
-    xls:  { icon:'📗', label:'Excel', cls:'ftype-xls'  },
-    xlsx: { icon:'📗', label:'Excel', cls:'ftype-xls'  },
-    ppt:  { icon:'📙', label:'PPT',   cls:'ftype-ppt'  },
-    pptx: { icon:'📙', label:'PPT',   cls:'ftype-ppt'  },
-    txt:  { icon:'📄', label:'TXT',   cls:'ftype-txt'  },
-    csv:  { icon:'📊', label:'CSV',   cls:'ftype-xls'  },
-    zip:  { icon:'🗜', label:'ZIP',   cls:'ftype-zip'  },
-    rar:  { icon:'🗜', label:'RAR',   cls:'ftype-zip'  },
-    '7z': { icon:'🗜', label:'7Z',    cls:'ftype-zip'  },
-    jpg:  { icon:'🖼', label:'JPG',   cls:'ftype-img'  },
-    jpeg: { icon:'🖼', label:'JPEG',  cls:'ftype-img'  },
-    png:  { icon:'🖼', label:'PNG',   cls:'ftype-img'  },
-    gif:  { icon:'🖼', label:'GIF',   cls:'ftype-img'  },
-    webp: { icon:'🖼', label:'WEBP',  cls:'ftype-img'  },
-    svg:  { icon:'🖼', label:'SVG',   cls:'ftype-img'  },
+    pdf:  { icon:'', label:'PDF',   cls:'ftype-pdf'  },
+    doc:  { icon:'', label:'DOC',   cls:'ftype-doc'  },
+    docx: { icon:'', label:'DOCX',  cls:'ftype-doc'  },
+    xls:  { icon:'', label:'XLS',   cls:'ftype-xls'  },
+    xlsx: { icon:'', label:'XLSX',  cls:'ftype-xls'  },
+    ppt:  { icon:'', label:'PPT',   cls:'ftype-ppt'  },
+    pptx: { icon:'', label:'PPTX',  cls:'ftype-ppt'  },
+    txt:  { icon:'', label:'TXT',   cls:'ftype-txt'  },
+    csv:  { icon:'', label:'CSV',   cls:'ftype-xls'  },
+    zip:  { icon:'', label:'ZIP',   cls:'ftype-zip'  },
+    rar:  { icon:'', label:'RAR',   cls:'ftype-zip'  },
+    '7z': { icon:'', label:'7Z',    cls:'ftype-zip'  },
+    jpg:  { icon:'', label:'JPG',   cls:'ftype-img'  },
+    jpeg: { icon:'', label:'JPEG',  cls:'ftype-img'  },
+    png:  { icon:'', label:'PNG',   cls:'ftype-img'  },
+    gif:  { icon:'', label:'GIF',   cls:'ftype-img'  },
+    webp: { icon:'', label:'WEBP',  cls:'ftype-img'  },
+    svg:  { icon:'', label:'SVG',   cls:'ftype-img'  },
 };
-function getFileType(ext='') { return FILE_TYPES[ext.toLowerCase()] || { icon:'📎', label:ext.toUpperCase()||'FILE', cls:'ftype-other' }; }
+function getFileType(ext='') { return FILE_TYPES[ext.toLowerCase()] || { icon:'', label:ext.toUpperCase()||'FILE', cls:'ftype-other' }; }
 
 /* ===================== STATE ===================== */
 let tasks           = [];
@@ -523,9 +523,89 @@ function updateLastRefreshed() {
 function showToast(type, icon, msg) {
     const t=document.createElement('div');
     t.className=`toast toast-${type}`;
-    t.innerHTML=`<span class="toast-icon">${icon}</span><span>${msg}</span>`;
+    const iconHtml = icon ? `<span class="toast-icon">${icon}</span>` : '';
+    t.innerHTML=`${iconHtml}<span>${msg}</span>`;
     toastContainer.appendChild(t);
     setTimeout(()=>{ t.classList.add('hide'); t.addEventListener('animationend',()=>t.remove(),{once:true}); },3500);
+}
+
+/* ===================== AUTH & SESSION MANAGEMENT ===================== */
+const AUTH_KEY = 'taskflow_admin_auth';
+
+function isAuth() {
+    return localStorage.getItem(AUTH_KEY) === 'true';
+}
+
+function checkAuth() {
+    const gate    = document.getElementById('authGate');
+    const header  = document.getElementById('adminMainContent');
+    const content = document.getElementById('adminDashboardContent');
+    if (!isAuth()) {
+        if (gate)    gate.style.display = 'flex';
+        if (header)  header.style.display = 'none';
+        if (content) content.style.display = 'none';
+        return false;
+    } else {
+        if (gate)    gate.style.display = 'none';
+        if (header)  header.style.display = 'block';
+        if (content) content.style.display = 'block';
+        return true;
+    }
+}
+
+function loginAdmin(username, password) {
+    const user = (username || '').trim().toLowerCase();
+    const pass = (password || '').trim();
+    const alertBox = document.getElementById('loginAlert');
+    const alertText = document.getElementById('loginAlertText');
+
+    if ((user === 'admin' || user === 'fauzi') && (pass === 'admin123' || pass === 'fauzi123' || pass === '123')) {
+        localStorage.setItem(AUTH_KEY, 'true');
+        if (alertBox) alertBox.classList.remove('show');
+        checkAuth();
+        showToast('success', '', 'Login berhasil! Selamat datang, Fauzi.');
+        refreshAll();
+        initSignatureCanvas();
+        return true;
+    } else {
+        if (alertBox) alertBox.classList.add('show');
+        if (alertText) alertText.textContent = 'Username atau password salah. Coba lagi.';
+        return false;
+    }
+}
+
+function logoutAdmin() {
+    localStorage.removeItem(AUTH_KEY);
+    showToast('info', '', 'Anda telah keluar dari Panel Admin.');
+    checkAuth();
+}
+
+function initAuthListeners() {
+    const form = document.getElementById('adminLoginForm');
+    const userInp = document.getElementById('adminUsername');
+    const passInp = document.getElementById('adminPassword');
+    const btnToggle = document.getElementById('btnTogglePw');
+    const btnLogout = document.getElementById('btnLogoutAdmin');
+
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            loginAdmin(userInp.value, passInp.value);
+        });
+    }
+
+    if (btnToggle && passInp) {
+        btnToggle.addEventListener('click', () => {
+            const isPw = passInp.type === 'password';
+            passInp.type = isPw ? 'text' : 'password';
+        });
+    }
+
+    if (btnLogout) {
+        btnLogout.addEventListener('click', () => {
+            logoutAdmin();
+        });
+    }
 }
 
 /* ===================== REFRESH ALL ===================== */
@@ -542,21 +622,28 @@ function refreshAll() {
 let lastTaskCount = -1; // track changes for polling
 
 (function init(){
+    initAuthListeners();
+    const authenticated = checkAuth();
+
     loadTasks();
     loadStudents();
     lastTaskCount = tasks.length;
     updateClock();
     setInterval(updateClock, 1000);
-    updateStats();
-    updateSubjectFilter();
-    applyAdminFilters();
-    updateStudentList();
-    initSignatureCanvas();
-    updateLastRefreshed();
+
+    if (authenticated) {
+        updateStats();
+        updateSubjectFilter();
+        applyAdminFilters();
+        updateStudentList();
+        initSignatureCanvas();
+        updateLastRefreshed();
+    }
 
     // 1) Cross-tab: storage event (other tabs)
     window.addEventListener('storage', e => {
-        if(e.key===STORAGE_KEY || e.key===STUDENT_KEY) { refreshAll(); }
+        if (e.key === AUTH_KEY) { checkAuth(); }
+        if (e.key === STORAGE_KEY || e.key === STUDENT_KEY) { refreshAll(); }
     });
 
     // 2) Same-tab / same-page: poll localStorage every 3 seconds
@@ -565,19 +652,19 @@ let lastTaskCount = -1; // track changes for polling
             const raw = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
             if(raw.length !== lastTaskCount) {
                 lastTaskCount = raw.length;
-                refreshAll();
+                if (isAuth()) refreshAll();
             }
         } catch(e) {}
     }, 3000);
 
     // 3) Refresh when user switches back to this tab
     document.addEventListener('visibilitychange', () => {
-        if(!document.hidden) refreshAll();
+        if(!document.hidden && isAuth()) refreshAll();
     });
 
     // 4) Refresh button
     const btnRefresh = document.getElementById('btnRefresh');
-    if(btnRefresh) btnRefresh.addEventListener('click', () => { refreshAll(); showToast('info','🔄','Data diperbarui.'); });
+    if(btnRefresh) btnRefresh.addEventListener('click', () => { if(isAuth()) { refreshAll(); showToast('info','','Data diperbarui.'); } });
 })();
 
 /* ===================== SIGNATURE CANVAS ===================== */
