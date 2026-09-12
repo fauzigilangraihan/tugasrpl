@@ -1713,3 +1713,180 @@ tbody tr:last-child td { border-bottom: none; }
     .card { padding: 0.9rem 0.85rem; }
     .form-section { padding: 0.9rem 0.85rem; }
 }
+}
+
+/* =============================================
+   ADMIN TABBED NAVIGATION & NEW UI COMPONENTS
+   ============================================= */
+.admin-tabs-nav {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+.admin-tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    font-family: var(--font);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all var(--transition);
+    white-space: nowrap;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.admin-tab-btn:hover {
+    color: var(--accent-dark);
+    background: var(--accent-bg);
+}
+.admin-tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: #ffffff;
+}
+.admin-tab-badge {
+    background: #e2e8f0;
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 99px;
+    font-weight: 700;
+}
+.admin-tab-btn.active .admin-tab-badge {
+    background: var(--accent-bg);
+    color: var(--accent);
+}
+
+.tab-content {
+    display: none;
+    animation: tabFadeIn 0.25s ease;
+}
+.tab-content.active {
+    display: block;
+}
+@keyframes tabFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Active Assignment Cards */
+.assignments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+}
+.assignment-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition);
+    position: relative;
+}
+.assignment-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-light);
+}
+.assignment-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+.assignment-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+.assignment-subject {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+.assignment-meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    background: #f8fafc;
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-sm);
+}
+.assignment-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+/* Student Profile Welcome Banner */
+.saved-profile-banner {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border: 1px solid #a7f3d0;
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+.saved-profile-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.saved-profile-avatar {
+    width: 38px;
+    height: 38px;
+    background: var(--accent);
+    color: white;
+    font-weight: 800;
+    font-size: 0.9rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Submission Receipt Modal */
+.receipt-box {
+    background: #f8fafc;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin: 1rem 0;
+    text-align: left;
+}
+.receipt-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.82rem;
+}
+.receipt-row:last-child {
+    border-bottom: none;
+}
+.receipt-label {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+.receipt-value {
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: right;
+}

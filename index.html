@@ -368,6 +368,18 @@
             </div>
         </div>
 
+        <!-- SAVED PROFILE BANNER (JS toggle) -->
+        <div class="saved-profile-banner" id="savedProfileBanner" style="display:none;">
+            <div class="saved-profile-info">
+                <div class="saved-profile-avatar" id="savedProfileAvatar">S</div>
+                <div>
+                    <div style="font-size:0.88rem;font-weight:700;color:#065f46;" id="savedProfileText">Selamat datang kembali!</div>
+                    <div style="font-size:0.75rem;color:#047857;">Data diri tersimpan untuk kemudahan pengumpulan tugas.</div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" id="btnChangeProfile" style="color:#065f46;border-color:#a7f3d0;">Ganti Siswa</button>
+        </div>
+
         <!-- FORM SECTION -->
         <section class="card form-section">
             <div class="section-header">
@@ -377,41 +389,62 @@
                         Form Pengumpulan
                     </span>
                     <h2 class="card-title">Form Pengumpulan Tugas</h2>
-                    <p class="card-subtitle">Isi semua field yang bertanda <span class="required-mark">*</span> — pastikan data benar sebelum dikumpulkan</p>
+                    <p class="card-subtitle">Pilih tugas yang diberikan oleh Mentor atau isi data secara langsung</p>
                 </div>
-            </div>
-
-            <!-- Info strip deadline reminder -->
-            <div class="info-strip" style="margin-bottom:1.25rem;">
-                <svg class="svg-icon sm" viewBox="0 0 24 24" style="color:#d97706;flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                <span>Perhatikan deadline yang diberikan oleh mentor. Tugas yang dikumpulkan <strong>setelah deadline</strong> akan otomatis ditandai sebagai <strong>Terlambat</strong>.</span>
             </div>
 
             <form id="taskForm" novalidate>
                 <input type="hidden" id="editId" value="" />
 
+                <!-- SELEKSI TUGAS AKTIF -->
+                <div class="form-group span-2" style="background:#f8fafc;padding:1rem;border-radius:12px;border:1.5px dashed #cbd5e1;margin-bottom:1rem;">
+                    <label for="selectAssignment" style="color:#0f172a;font-weight:700;display:flex;align-items:center;gap:0.4rem;">
+                        <svg class="svg-icon sm" viewBox="0 0 24 24" style="color:#059669;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        Pilih Tugas dari Mentor <span class="required-mark">*</span>
+                    </label>
+                    <select id="selectAssignment" style="width:100%;margin-top:0.4rem;font-size:0.9rem;padding:0.65rem 0.85rem;border-radius:8px;border:1px solid #cbd5e1;background:#ffffff;font-family:var(--font);font-weight:600;color:#1e293b;">
+                        <option value="">-- Loading penugasan aktif... --</option>
+                    </select>
+                    
+                    <!-- Detail Penugasan Aktif -->
+                    <div id="assignmentDetailCard" style="display:none;margin-top:0.85rem;background:#ffffff;border:1px solid #6ee7b7;border-radius:8px;padding:0.85rem 1rem;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;">
+                            <span id="assignDetailSubject" style="font-size:0.75rem;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.04em;">-</span>
+                            <span id="assignDetailDeadline" style="font-size:0.75rem;font-weight:700;background:#ecfdf5;color:#047857;padding:0.15rem 0.55rem;border-radius:99px;border:1px solid #a7f3d0;">Deadline: -</span>
+                        </div>
+                        <div id="assignDetailTitle" style="font-size:0.92rem;font-weight:700;color:#0f172a;">-</div>
+                        <div id="assignDetailDesc" style="font-size:0.78rem;color:#475569;margin-top:0.25rem;line-height:1.45;">-</div>
+                    </div>
+                </div>
+
                 <div class="form-grid">
-                    <!-- Nama -->
+                    <!-- Nama Lengkap -->
                     <div class="form-group">
-                        <label for="inputName">Nama Lengkap <span class="required-mark">*</span></label>
+                        <label for="inputName">Nama Lengkap Siswa <span class="required-mark">*</span></label>
                         <input type="text" id="inputName" placeholder="Contoh: Budi Santoso" autocomplete="off" maxlength="80" />
-                        <div class="field-desc">Tulis nama lengkap sesuai daftar hadir.</div>
                         <span class="field-error" id="errName"></span>
+                    </div>
+
+                    <!-- Kelas -->
+                    <div class="form-group">
+                        <label for="inputClassGroup">Kelas <span class="required-mark">*</span></label>
+                        <select id="inputClassGroup" style="width:100%;padding:0.65rem 0.85rem;border-radius:8px;border:1px solid var(--border);font-family:var(--font);font-size:0.88rem;background:white;">
+                            <option value="RPL 1">RPL 1</option>
+                            <option value="RPL 2">RPL 2</option>
+                        </select>
                     </div>
 
                     <!-- Mata Pelajaran -->
                     <div class="form-group">
-                        <label for="inputSubject">Mata Pelajaran / Kelas <span class="required-mark">*</span></label>
-                        <input type="text" id="inputSubject" placeholder="Contoh: Pemrograman Web — RPL 1" autocomplete="off" maxlength="80" />
-                        <div class="field-desc">Sertakan nama kelas (RPL 1 atau RPL 2).</div>
+                        <label for="inputSubject">Mata Pelajaran <span class="required-mark">*</span></label>
+                        <input type="text" id="inputSubject" placeholder="Contoh: Pemrograman Web" autocomplete="off" maxlength="80" />
                         <span class="field-error" id="errSubject"></span>
                     </div>
 
                     <!-- Judul Tugas -->
-                    <div class="form-group span-2">
+                    <div class="form-group">
                         <label for="inputTitle">Judul Tugas <span class="required-mark">*</span></label>
-                        <input type="text" id="inputTitle" placeholder="Contoh: Tugas 3 — Membuat Halaman Login HTML" autocomplete="off" maxlength="120" />
-                        <div class="field-desc">Tulis judul tugas secara spesifik sesuai yang diberikan mentor.</div>
+                        <input type="text" id="inputTitle" placeholder="Contoh: Tugas 1 — Making HTML Login" autocomplete="off" maxlength="120" />
                         <span class="field-error" id="errTitle"></span>
                     </div>
 
@@ -422,20 +455,20 @@
                         <div class="submit-type-toggle">
                             <button type="button" class="type-btn active" id="typeBtnUrl" data-type="url">
                                 <svg class="svg-icon sm" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                                Link URL
+                                Link URL (Drive/GitHub)
                             </button>
                             <button type="button" class="type-btn" id="typeBtnFile" data-type="file">
                                 <svg class="svg-icon sm" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                                Upload File
+                                Upload File (PDF, DOCX, ZIP, Gambar)
                             </button>
                         </div>
 
                         <!-- URL input -->
                         <div id="urlInputWrap">
-                            <input type="url" id="inputLink" placeholder="https://drive.google.com/... atau link lainnya" autocomplete="off" />
+                            <input type="url" id="inputLink" placeholder="https://drive.google.com/... atau link GitHub" autocomplete="off" />
                             <div class="form-tip">
                                 <svg class="svg-icon sm" viewBox="0 0 24 24" style="color:#059669;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                                <span>Tempel link dari <strong>Google Drive</strong>, <strong>OneDrive</strong>, <strong>Dropbox</strong>, <strong>GitHub</strong>, atau platform penyimpanan lainnya. Pastikan link dapat diakses publik / anyone with link.</span>
+                                <span>Tempel link dari <strong>Google Drive</strong>, <strong>GitHub</strong>, atau cloud storage lainnya. Pastikan akses publik.</span>
                             </div>
                         </div>
 
@@ -463,43 +496,21 @@
                                 </div>
                                 <button type="button" class="file-prev-remove" id="btnRemoveFile" title="Hapus file">✕</button>
                             </div>
-                            <!-- Format chips -->
-                            <div class="format-chips">
-                                <span class="format-chip pdf">PDF</span>
-                                <span class="format-chip doc">DOC/DOCX</span>
-                                <span class="format-chip xls">XLS/XLSX</span>
-                                <span class="format-chip doc">PPT/PPTX</span>
-                                <span class="format-chip img">JPG/PNG</span>
-                                <span class="format-chip zip">ZIP/RAR</span>
-                                <span class="format-chip lain">TXT/CSV</span>
-                            </div>
                         </div>
 
                         <span class="field-error" id="errLink"></span>
                     </div>
 
-                    <!-- Tanggal Pengumpulan (Otomatis) -->
-                    <div class="form-group">
-                        <label>Tanggal &amp; Waktu Pengumpulan</label>
-                        <div class="auto-timestamp-box" style="display:flex;align-items:center;gap:0.5rem;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:0.65rem 0.85rem;font-size:0.82rem;font-weight:600;color:#065f46;">
-                            <svg class="svg-icon sm" viewBox="0 0 24 24" style="color:#059669;flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            <span>Otomatis tercatat saat dikumpulkan (Waktu Real-time)</span>
-                        </div>
-                        <input type="hidden" id="inputDate" />
-                    </div>
-
-                    <!-- Deadline (Ditentukan oleh Mentor) -->
-                    <div class="form-group">
-                        <label>Deadline Tugas (Ditentukan oleh Mentor)</label>
-                        <div class="auto-timestamp-box" style="display:flex;align-items:center;gap:0.5rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.65rem 0.85rem;font-size:0.82rem;font-weight:700;color:#15803d;">
-                            <svg class="svg-icon sm" viewBox="0 0 24 24" style="color:#16a34a;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                            <span id="studentDeadlineDisplayText">Sedang memuat deadline...</span>
-                        </div>
-                        <input type="hidden" id="inputDeadline" />
-                    </div>
+                    <input type="hidden" id="inputDate" />
+                    <input type="hidden" id="inputDeadline" />
                 </div>
 
-                <div class="form-actions">
+                <div style="margin-top:1rem;display:flex;align-items:center;gap:0.5rem;font-size:0.83rem;color:var(--text-secondary);">
+                    <input type="checkbox" id="chkRemember" checked style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;" />
+                    <label for="chkRemember" style="cursor:pointer;font-weight:500;">Ingat Nama &amp; Kelas saya di HP/Browser ini</label>
+                </div>
+
+                <div class="form-actions" style="margin-top:1.25rem;">
                     <button type="submit" class="btn btn-primary" id="btnSubmit">
                         <svg class="svg-icon sm" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                         <span id="btnLabel">Kumpulkan Tugas</span>
@@ -509,7 +520,7 @@
                     </button>
                     <button type="reset" class="btn btn-ghost" id="btnReset">
                         <svg class="svg-icon sm" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 .49-3.51"></path></svg>
-                        Reset
+                        Reset Form
                     </button>
                 </div>
             </form>
@@ -539,7 +550,7 @@
                         Riwayat
                     </span>
                     <h2 class="card-title">Daftar Tugas Terkumpul</h2>
-                    <p class="card-subtitle">Semua tugas yang telah dikumpulkan ditampilkan di sini. Klik Edit untuk mengubah data.</p>
+                    <p class="card-subtitle">Semua tugas yang telah dikumpulkan ditampilkan di sini.</p>
                 </div>
                 <div style="display:flex;gap:0.5rem;align-items:center;">
                     <button class="btn btn-danger-outline btn-sm" id="btnClearAll">Hapus Semua</button>
@@ -577,6 +588,54 @@
 
     <!-- TOAST -->
     <div id="toastContainer" class="toast-container" role="alert" aria-live="polite"></div>
+
+    <!-- MODAL RESI PENGUMPULAN (SUBMISSION RECEIPT) -->
+    <div class="modal-overlay" id="receiptModalOverlay" aria-hidden="true">
+        <div class="modal" style="max-width:440px;">
+            <div style="width:54px;height:54px;background:#ecfdf5;border:2px solid #6ee7b7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem;">
+                <svg class="svg-icon lg" viewBox="0 0 24 24" style="color:#059669;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <h3 style="font-size:1.15rem;font-weight:800;color:#065f46;">Pengumpulkan Berhasil!</h3>
+            <p style="font-size:0.8rem;color:#475569;margin-top:0.2rem;">Tugas kamu telah berhasil tercatat di sistem TaskFlow</p>
+
+            <div class="receipt-box">
+                <div class="receipt-row">
+                    <span class="receipt-label">No. Resi</span>
+                    <span class="receipt-value" id="rcptId">#TF-0000</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Nama Siswa</span>
+                    <span class="receipt-value" id="rcptName">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Kelas</span>
+                    <span class="receipt-value" id="rcptClass">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Mata Pelajaran</span>
+                    <span class="receipt-value" id="rcptSubject">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Judul Tugas</span>
+                    <span class="receipt-value" id="rcptTitle">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Waktu Kumpul</span>
+                    <span class="receipt-value" id="rcptDate">-</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Status</span>
+                    <span class="receipt-value" id="rcptStatus">-</span>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+                <button class="btn btn-primary btn-sm" id="btnCopyReceipt" style="flex:1;">📋 Salin Bukti Pengumpulkan</button>
+                <button class="btn btn-ghost btn-sm" id="btnCloseReceipt">Tutup</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- MODAL DELETE -->
     <div class="modal-overlay" id="modalOverlay" aria-hidden="true">

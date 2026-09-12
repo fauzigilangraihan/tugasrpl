@@ -586,304 +586,377 @@
 
     <main class="container" id="adminDashboardContent" style="display:none;">
 
-        <!-- GLOBAL DEADLINE CONTROL CARD -->
-        <div class="card" style="margin-bottom:1.5rem;">
-            <div class="card-header" style="border-bottom:1px solid var(--border);padding-bottom:0.75rem;margin-bottom:1rem;">
-                <div>
-                    <div class="card-title" style="display:flex;align-items:center;gap:0.5rem;font-size:1.05rem;font-weight:700;">
-                        <svg class="svg-icon sm" viewBox="0 0 24 24" style="color:#059669;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                        Pengaturan Deadline Pengumpulan Tugas (Mentor/Admin)
-                    </div>
-                    <div class="card-subtitle">Tentukan batas akhir pengumpulan tugas untuk seluruh siswa. Siswa akan melihat deadline ini secara otomatis.</div>
-                </div>
-            </div>
-            <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
-                <div style="flex:1;min-width:250px;">
-                    <label for="adminDeadlineInput" style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.35rem;color:var(--text-secondary);">Batas Akhir (Tanggal &amp; Waktu Jam:Menit)</label>
-                    <input type="datetime-local" id="adminDeadlineInput" style="width:100%;padding:0.65rem 0.85rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.88rem;outline:none;" />
-                </div>
-                <div style="display:flex;gap:0.5rem;align-self:flex-end;">
-                    <button class="btn btn-primary" id="btnSaveDeadline" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.65rem 1.25rem;">
-                        <svg class="svg-icon sm" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                        Simpan Deadline
-                    </button>
-                </div>
-            </div>
-            <div id="adminDeadlineStatus" style="font-size:0.78rem;color:#059669;font-weight:600;margin-top:0.75rem;"></div>
+        <!-- TAB NAVIGATION NAV -->
+        <div class="admin-tabs-nav">
+            <button class="admin-tab-btn active" id="btnTabSubmissions" data-tab="tabSubmissions">
+                📋 Pengumpulan Tugas <span class="admin-tab-badge" id="badgeSubmissions">0</span>
+            </button>
+            <button class="admin-tab-btn" id="btnTabAssignments" data-tab="tabAssignments">
+                🎯 Kelola Penugasan <span class="admin-tab-badge" id="badgeAssignments">0</span>
+            </button>
+            <button class="admin-tab-btn" id="btnTabRecap" data-tab="tabRecap">
+                👥 Rekap Progres Siswa
+            </button>
+            <button class="admin-tab-btn" id="btnTabSettings" data-tab="tabSettings">
+                ⚙️ Pengaturan &amp; TTD
+            </button>
         </div>
 
-        <!-- SIGNATURE CANVAS CARD -->
-        <div class="card sig-card">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">Tanda Tangan Digital — Fauzi</div>
-                    <div class="card-subtitle">Buat atau perbarui tanda tangan Anda. Tanda tangan akan tampil di halaman siswa.</div>
+        <!-- ==================== TAB 1: PENGUMPULAN TUGAS ==================== -->
+        <div class="tab-content active" id="tabSubmissions">
+            
+            <!-- KPI STATS -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card blue">
+                    <div class="stat-icon-wrap">
+                        <svg class="svg-icon lg" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-number" id="statTotal">0</div>
+                        <div class="stat-label">Total Tugas Masuk</div>
+                        <div class="stat-trend" id="trendTotal"></div>
+                    </div>
                 </div>
-                <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
-                    <div class="sig-status-pill" id="sigStatusPill">Belum Ada</div>
-                    <button class="btn btn-danger-outline btn-sm" id="btnClearSig">Hapus</button>
-                    <button class="btn btn-primary btn-sm" id="btnSaveSig">Simpan Tanda Tangan</button>
+                <div class="stat-card green">
+                    <div class="stat-icon-wrap">
+                        <svg class="svg-icon lg" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-number" id="statTepat">0</div>
+                        <div class="stat-label">Tepat Waktu</div>
+                        <div class="stat-trend up" id="trendTepat"></div>
+                    </div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-icon-wrap">
+                        <svg class="svg-icon lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-number" id="statTerlambat">0</div>
+                        <div class="stat-label">Terlambat</div>
+                        <div class="stat-trend down" id="trendTerlambat"></div>
+                    </div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-icon-wrap">
+                        <svg class="svg-icon lg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-number" id="statSiswa">0</div>
+                        <div class="stat-label">Siswa Kumpul</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="sig-canvas-area">
-                <div class="sig-tools">
-                    <div class="sig-tool-group">
-                        <span class="sig-tool-label">Warna:</span>
-                        <button class="sig-color-btn active" data-color="#1e293b" style="background:#1e293b;" title="Hitam"></button>
-                        <button class="sig-color-btn" data-color="#1d4ed8" style="background:#1d4ed8;" title="Biru"></button>
-                        <button class="sig-color-btn" data-color="#dc2626" style="background:#dc2626;" title="Merah"></button>
-                        <button class="sig-color-btn" data-color="#059669" style="background:#059669;" title="Hijau"></button>
+            <!-- ALL TASKS TABLE CARD -->
+            <div class="card" style="margin-top:1.25rem;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Daftar Pengumpulan Tugas Siswa</div>
+                        <div class="card-subtitle">Pantau, lihat file, dan ekspor data pengumpulan tugas</div>
                     </div>
-                    <div class="sig-tool-group">
-                        <span class="sig-tool-label">Ketebalan:</span>
-                        <button class="sig-size-btn active" data-size="2" title="Tipis"><span style="width:12px;height:2px;background:currentColor;display:block;"></span></button>
-                        <button class="sig-size-btn" data-size="4" title="Sedang"><span style="width:12px;height:4px;background:currentColor;display:block;"></span></button>
-                        <button class="sig-size-btn" data-size="7" title="Tebal"><span style="width:12px;height:7px;background:currentColor;display:block;"></span></button>
-                    </div>
-                    <div class="sig-tool-group">
-                        <button class="btn btn-ghost btn-sm" id="btnUndoSig">Undo</button>
-                        <button class="btn btn-ghost btn-sm" id="btnEraseSig">Hapus Semua</button>
+                    <div class="toolbar no-print">
+                        <button class="btn btn-success btn-sm" id="btnExportCSV">📥 Export CSV</button>
+                        <button class="btn btn-outline btn-sm" id="btnPrint">🖨️ Print Data</button>
+                        <button class="btn btn-danger-outline btn-sm" id="btnDeleteAll">Hapus Semua</button>
                     </div>
                 </div>
-                <div class="sig-canvas-wrap">
-                    <canvas id="sigCanvas" width="700" height="220"></canvas>
-                    <div class="sig-canvas-hint" id="sigCanvasHint">Tanda tangani di sini ↓</div>
+
+                <!-- Bulk bar -->
+                <div class="bulk-bar no-print" id="bulkBar">
+                    <span id="bulkCount">0 dipilih</span>
+                    <button class="btn btn-danger btn-xs" id="btnDeleteSelected">Hapus Terpilih</button>
+                    <button class="btn btn-ghost btn-xs" id="btnDeselectAll">Batal</button>
                 </div>
-                <div class="sig-saved-preview" id="sigSavedPreview" style="display:none;">
-                    <div class="sig-preview-label">Tanda tangan tersimpan — ditampilkan ke siswa</div>
-                    <img id="sigPreviewImg" src="" alt="Tanda Tangan Tersimpan" class="sig-preview-img" />
+
+                <!-- Search & filter bar -->
+                <div class="search-filter-bar no-print" style="margin-bottom:1rem;">
+                    <div class="search-wrapper">
+                        <svg class="svg-icon sm search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="adminSearch" placeholder="Cari nama siswa, tugas, mapel..." />
+                        <button class="btn-clear" id="adminClearSearch">✕</button>
+                    </div>
+                    <select class="filter-select" id="adminFilterClass">
+                        <option value="">Semua Kelas</option>
+                        <option value="RPL 1">RPL 1</option>
+                        <option value="RPL 2">RPL 2</option>
+                    </select>
+                    <select class="filter-select" id="adminFilterSubject">
+                        <option value="">Semua Mapel</option>
+                    </select>
+                    <select class="filter-select" id="adminFilterStatus">
+                        <option value="">Semua Status</option>
+                        <option value="tepat">Tepat Waktu</option>
+                        <option value="terlambat">Terlambat</option>
+                    </select>
+                    <span class="result-count" id="adminResultCount">0 tugas</span>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="adminTable">
+                        <thead>
+                            <tr>
+                                <th class="no-print"><input type="checkbox" id="selectAll" title="Pilih semua" /></th>
+                                <th>#</th>
+                                <th data-sort="name">Nama Siswa ↕</th>
+                                <th data-sort="classGroup">Kelas ↕</th>
+                                <th data-sort="subject">Mata Pelajaran ↕</th>
+                                <th data-sort="title">Judul Tugas</th>
+                                <th>Link / File</th>
+                                <th data-sort="date">Tgl. Kumpul ↕</th>
+                                <th data-sort="deadline">Deadline ↕</th>
+                                <th data-sort="status">Status ↕</th>
+                                <th class="no-print">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminBody"></tbody>
+                    </table>
+                    <div class="empty-state" id="adminEmpty" style="display:none;">
+                        <p>Tidak ada pengumpulan tugas ditemukan.</p>
+                        <p class="empty-sub">Ubah kata kunci pencarian atau filter di atas.</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- KPI STATS -->
-        <div class="stats-grid" id="statsGrid">
-            <div class="stat-card blue">
-                <div class="stat-icon-wrap">
-                    <svg class="svg-icon lg" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+        <!-- ==================== TAB 2: KELOLA PENUGASAN ==================== -->
+        <div class="tab-content" id="tabAssignments">
+            <!-- Form Buat Penugasan Baru -->
+            <div class="card" style="margin-bottom:1.5rem;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">🎯 Buat Penugasan Baru</div>
+                        <div class="card-subtitle">Buat instruksi & deadline tugas agar siswa dapat memilih dari dropdown</div>
+                    </div>
                 </div>
-                <div class="stat-body">
-                    <div class="stat-number" id="statTotal">0</div>
-                    <div class="stat-label">Total Tugas</div>
-                    <div class="stat-trend" id="trendTotal"></div>
-                </div>
+                
+                <form id="formAssignment" onsubmit="return false;">
+                    <input type="hidden" id="asgnEditId" value="" />
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="asgnTitle">Judul Penugasan <span class="required-mark">*</span></label>
+                            <input type="text" id="asgnTitle" placeholder="Contoh: Tugas 1 — Making HTML Login" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="asgnSubject">Mata Pelajaran <span class="required-mark">*</span></label>
+                            <input type="text" id="asgnSubject" placeholder="Contoh: Pemrograman Web" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="asgnClassGroup">Target Kelas <span class="required-mark">*</span></label>
+                            <select id="asgnClassGroup" style="width:100%;padding:0.65rem 0.85rem;border-radius:8px;border:1px solid var(--border);font-family:var(--font);font-size:0.88rem;background:white;">
+                                <option value="Semua">Semua Kelas (RPL 1 &amp; RPL 2)</option>
+                                <option value="RPL 1">Hanya RPL 1</option>
+                                <option value="RPL 2">Hanya RPL 2</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="asgnDeadline">Deadline Pengumpulan <span class="required-mark">*</span></label>
+                            <input type="datetime-local" id="asgnDeadline" required style="width:100%;padding:0.65rem 0.85rem;border-radius:8px;border:1px solid var(--border);font-family:var(--font);font-size:0.88rem;" />
+                        </div>
+                        <div class="form-group span-2">
+                            <label for="asgnDesc">Instruksi / Catatan untuk Siswa</label>
+                            <textarea id="asgnDesc" rows="2" placeholder="Contoh: Lampirkan file ZIP source code HTML atau link GitHub repository..." style="width:100%;padding:0.65rem 0.85rem;border-radius:8px;border:1px solid var(--border);font-family:var(--font);font-size:0.88rem;resize:vertical;"></textarea>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+                        <button type="button" class="btn btn-primary" id="btnSaveAssignment">
+                            <svg class="svg-icon sm" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <span id="btnAsgnLabel">Publikasikan Penugasan</span>
+                        </button>
+                        <button type="button" class="btn btn-ghost" id="btnCancelAssignment" style="display:none;">Batal Edit</button>
+                    </div>
+                </form>
             </div>
-            <div class="stat-card green">
-                <div class="stat-icon-wrap">
-                    <svg class="svg-icon lg" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                </div>
-                <div class="stat-body">
-                    <div class="stat-number" id="statTepat">0</div>
-                    <div class="stat-label">Tepat Waktu</div>
-                    <div class="stat-trend up" id="trendTepat"></div>
-                </div>
-            </div>
-            <div class="stat-card red">
-                <div class="stat-icon-wrap">
-                    <svg class="svg-icon lg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                </div>
-                <div class="stat-body">
-                    <div class="stat-number" id="statTerlambat">0</div>
-                    <div class="stat-label">Terlambat</div>
-                    <div class="stat-trend down" id="trendTerlambat"></div>
-                </div>
-            </div>
-            <div class="stat-card purple">
-                <div class="stat-icon-wrap">
-                    <svg class="svg-icon lg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                </div>
-                <div class="stat-body">
-                    <div class="stat-number" id="statSiswa">0</div>
-                    <div class="stat-label">Siswa Unik</div>
-                </div>
-            </div>
-        </div>
 
-        <!-- ROW: CHARTS -->
-        <div class="admin-grid">
-            <!-- Donut Chart -->
+            <!-- List Active Assignments -->
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Rasio Status Pengumpulan</div>
-                        <div class="card-subtitle">Tepat waktu vs terlambat</div>
+                        <div class="card-title">Daftar Penugasan Aktif</div>
+                        <div class="card-subtitle">Tugas yang saat ini tayang di form siswa</div>
                     </div>
                 </div>
-                <div class="donut-wrap">
-                    <svg class="donut" width="120" height="120" viewBox="0 0 120 120" id="donutSvg">
-                        <circle cx="60" cy="60" r="45" fill="none" stroke="#f1f5f9" stroke-width="18"/>
-                        <circle class="donut-tepat" cx="60" cy="60" r="45" fill="none"
-                            stroke="#059669" stroke-width="18" stroke-dasharray="0 283" stroke-dashoffset="71"
-                            stroke-linecap="round"
-                            style="transition:stroke-dasharray .8s cubic-bezier(.4,0,.2,1);transform:rotate(-90deg);transform-origin:60px 60px" />
-                        <circle class="donut-terlambat" cx="60" cy="60" r="45" fill="none"
-                            stroke="#dc2626" stroke-width="18" stroke-dasharray="0 283" stroke-dashoffset="71"
-                            stroke-linecap="round"
-                            style="transition:stroke-dasharray .8s cubic-bezier(.4,0,.2,1) .1s;transform:rotate(-90deg);transform-origin:60px 60px" />
-                        <text x="60" y="55" text-anchor="middle" font-size="14" font-weight="800" fill="#1e293b" font-family="Inter,sans-serif" id="donutCenter">0%</text>
-                        <text x="60" y="70" text-anchor="middle" font-size="8" fill="#94a3b8" font-family="Inter,sans-serif">Tepat Waktu</text>
-                    </svg>
-                    <div class="donut-legend">
-                        <div class="legend-item">
-                            <div class="legend-dot" style="background:#059669"></div>
-                            <span class="legend-label">Tepat Waktu</span>
-                            <span class="legend-value" id="legTepat">0 (0%)</span>
+                <div class="assignments-grid" id="assignmentsContainer">
+                    <div class="empty-state" style="padding:2rem 0;grid-column:1/-1;">
+                        <p>Belum ada penugasan aktif.</p>
+                        <p class="empty-sub">Isi form di atas untuk mempublikasikan tugas pertama Anda.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 3: REKAP PROGRES SISWA ==================== -->
+        <div class="tab-content" id="tabRecap">
+            
+            <div class="admin-grid" style="margin-bottom:1.5rem;">
+                <!-- Donut Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Rasio Status Pengumpulan</div>
+                            <div class="card-subtitle">Persentase tepat waktu vs terlambat</div>
                         </div>
-                        <div class="legend-item">
-                            <div class="legend-dot" style="background:#dc2626"></div>
-                            <span class="legend-label">Terlambat</span>
-                            <span class="legend-value" id="legTerlambat">0 (0%)</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-dot" style="background:#f1f5f9;border:1px solid #cbd5e1"></div>
-                            <span class="legend-label">Total</span>
-                            <span class="legend-value" id="legTotal">0</span>
-                        </div>
-                        <div style="margin-top:.75rem;">
-                            <div class="progress-bar-wrap">
-                                <div class="progress-bar-fill" id="tepatBar" style="width:0%"></div>
+                    </div>
+                    <div class="donut-wrap">
+                        <svg class="donut" width="120" height="120" viewBox="0 0 120 120" id="donutSvg">
+                            <circle cx="60" cy="60" r="45" fill="none" stroke="#f1f5f9" stroke-width="18"/>
+                            <circle class="donut-tepat" cx="60" cy="60" r="45" fill="none"
+                                stroke="#059669" stroke-width="18" stroke-dasharray="0 283" stroke-dashoffset="71"
+                                stroke-linecap="round"
+                                style="transition:stroke-dasharray .8s cubic-bezier(.4,0,.2,1);transform:rotate(-90deg);transform-origin:60px 60px" />
+                            <circle class="donut-terlambat" cx="60" cy="60" r="45" fill="none"
+                                stroke="#dc2626" stroke-width="18" stroke-dasharray="0 283" stroke-dashoffset="71"
+                                stroke-linecap="round"
+                                style="transition:stroke-dasharray .8s cubic-bezier(.4,0,.2,1) .1s;transform:rotate(-90deg);transform-origin:60px 60px" />
+                            <text x="60" y="55" text-anchor="middle" font-size="14" font-weight="800" fill="#1e293b" font-family="Inter,sans-serif" id="donutCenter">0%</text>
+                            <text x="60" y="70" text-anchor="middle" font-size="8" fill="#94a3b8" font-family="Inter,sans-serif">Tepat Waktu</text>
+                        </svg>
+                        <div class="donut-legend">
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:#059669"></div>
+                                <span class="legend-label">Tepat Waktu</span>
+                                <span class="legend-value" id="legTepat">0 (0%)</span>
                             </div>
-                            <div class="progress-label">
-                                <span>0% tepat waktu</span>
-                                <span id="progressPct">0%</span>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:#dc2626"></div>
+                                <span class="legend-label">Terlambat</span>
+                                <span class="legend-value" id="legTerlambat">0 (0%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:#f1f5f9;border:1px solid #cbd5e1"></div>
+                                <span class="legend-label">Total</span>
+                                <span class="legend-value" id="legTotal">0</span>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Distribution Bar Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Jumlah Tugas per Mapel</div>
+                            <div class="card-subtitle">Distribusi pengumpulan per mata pelajaran</div>
+                        </div>
+                    </div>
+                    <div class="bar-chart" id="barChart">
+                        <div class="empty-state" style="padding:1.5rem 0;"><p>Tidak ada data.</p></div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Recent Activity -->
+            <!-- Student Roster & Participation -->
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <div class="card-title">Aktivitas Terbaru</div>
-                        <div class="card-subtitle">10 tugas terakhir yang dikumpulkan</div>
-                    </div>
-                </div>
-                <div class="activity-list" id="activityList">
-                    <div class="empty-state" style="padding:2rem 0;">
-                        <p>Belum ada aktivitas.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bar Chart: By Subject -->
-        <div class="card">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">Tugas per Mata Pelajaran</div>
-                    <div class="card-subtitle">Distribusi jumlah tugas berdasarkan mata pelajaran</div>
-                </div>
-            </div>
-            <div class="bar-chart" id="barChart">
-                <div class="empty-state" style="padding:2rem 0;">
-                    <p>Tidak ada data.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- ROW: Student Management + Status -->
-        <div class="admin-grid">
-            <!-- Daftar Siswa Terdaftar -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">Manajemen Siswa Terdaftar</div>
-                        <div class="card-subtitle">Tambah nama siswa untuk memantau siapa yang belum mengumpulkan</div>
+                        <div class="card-title">Daftar Siswa &amp; Rekap Partisipasi</div>
+                        <div class="card-subtitle">Pantau siswa terdaftar dan status pengumpulan mereka</div>
                     </div>
                 </div>
                 <div class="reg-form">
-                    <input type="text" id="regName" placeholder="Nama siswa..." />
-                    <input type="text" id="regSubject" placeholder="Mata pelajaran..." />
-                    <button class="btn btn-primary btn-sm" id="btnAddStudent">+ Tambah</button>
+                    <input type="text" id="regName" placeholder="Nama lengkap siswa..." />
+                    <select id="regClassGroup" style="padding:0.6rem 0.85rem;border-radius:8px;border:1px solid var(--border);font-family:var(--font);font-size:0.88rem;">
+                        <option value="RPL 1">RPL 1</option>
+                        <option value="RPL 2">RPL 2</option>
+                    </select>
+                    <button class="btn btn-primary btn-sm" id="btnAddStudent">+ Tambah Siswa</button>
                 </div>
-                <div class="student-list" id="studentList">
+                <div class="student-list" id="studentList" style="margin-top:1rem;">
                     <div class="empty-state" style="padding:1.5rem 0;">
                         <p>Belum ada siswa terdaftar.</p>
-                        <p class="empty-sub">Tambah nama siswa di atas untuk memantau status pengumpulan.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rekap Status per Mata Pelajaran -->
-            <div class="card">
-                <div class="card-header">
-                    <div>
-                        <div class="card-title">Rekap per Mata Pelajaran</div>
-                        <div class="card-subtitle">Persentase pengumpulan per mapel</div>
-                    </div>
-                </div>
-                <div id="subjectRecap">
-                    <div class="empty-state" style="padding:2rem 0;">
-                        <p>Tidak ada data.</p>
+                        <p class="empty-sub">Tambah nama siswa di atas untuk memantau status partisipasi.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ALL TASKS TABLE -->
-        <div class="card">
-            <div class="card-header">
-                <div>
-                    <div class="card-title">Semua Tugas Terkumpul</div>
-                    <div class="card-subtitle">Kelola dan ekspor data pengumpulan tugas</div>
+        <!-- ==================== TAB 4: PENGATURAN & TTD ==================== -->
+        <div class="tab-content" id="tabSettings">
+            
+            <!-- Global Default Deadline Card -->
+            <div class="card" style="margin-bottom:1.5rem;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">⏳ Default Deadline System (Fallback)</div>
+                        <div class="card-subtitle">Batas waktu pengumpulan jika siswa memilih pengumpulan kustom</div>
+                    </div>
                 </div>
-                <div class="toolbar no-print">
-                    <button class="btn btn-success btn-sm" id="btnExportCSV">Export CSV</button>
-                    <button class="btn btn-outline btn-sm" id="btnPrint">Print Data</button>
-                    <button class="btn btn-danger-outline btn-sm" id="btnDeleteAll">Hapus Semua</button>
+                <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:250px;">
+                        <label for="adminDeadlineInput" style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.35rem;color:var(--text-secondary);">Default Deadline</label>
+                        <input type="datetime-local" id="adminDeadlineInput" style="width:100%;padding:0.65rem 0.85rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.88rem;" />
+                    </div>
+                    <div style="align-self:flex-end;">
+                        <button class="btn btn-primary" id="btnSaveDeadline">Simpan Default Deadline</button>
+                    </div>
+                </div>
+                <div id="adminDeadlineStatus" style="font-size:0.78rem;color:#059669;font-weight:600;margin-top:0.5rem;"></div>
+            </div>
+
+            <!-- Tanda Tangan Digital Card -->
+            <div class="card sig-card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">✍️ Tanda Tangan Digital — Mentor Fauzi</div>
+                        <div class="card-subtitle">Tanda tangan akan tampil secara otomatis di halaman siswa</div>
+                    </div>
+                    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+                        <div class="sig-status-pill" id="sigStatusPill">Belum Ada</div>
+                        <button class="btn btn-danger-outline btn-sm" id="btnClearSig">Hapus</button>
+                        <button class="btn btn-primary btn-sm" id="btnSaveSig">Simpan Tanda Tangan</button>
+                    </div>
+                </div>
+
+                <div class="sig-canvas-area">
+                    <div class="sig-tools">
+                        <div class="sig-tool-group">
+                            <span class="sig-tool-label">Warna:</span>
+                            <button class="sig-color-btn active" data-color="#1e293b" style="background:#1e293b;" title="Hitam"></button>
+                            <button class="sig-color-btn" data-color="#1d4ed8" style="background:#1d4ed8;" title="Biru"></button>
+                            <button class="sig-color-btn" data-color="#dc2626" style="background:#dc2626;" title="Merah"></button>
+                            <button class="sig-color-btn" data-color="#059669" style="background:#059669;" title="Hijau"></button>
+                        </div>
+                        <div class="sig-tool-group">
+                            <span class="sig-tool-label">Ketebalan:</span>
+                            <button class="sig-size-btn active" data-size="2" title="Tipis"><span style="width:12px;height:2px;background:currentColor;display:block;"></span></button>
+                            <button class="sig-size-btn" data-size="4" title="Sedang"><span style="width:12px;height:4px;background:currentColor;display:block;"></span></button>
+                            <button class="sig-size-btn" data-size="7" title="Tebal"><span style="width:12px;height:7px;background:currentColor;display:block;"></span></button>
+                        </div>
+                        <div class="sig-tool-group">
+                            <button class="btn btn-ghost btn-sm" id="btnUndoSig">Undo</button>
+                            <button class="btn btn-ghost btn-sm" id="btnEraseSig">Hapus Canvas</button>
+                        </div>
+                    </div>
+                    <div class="sig-canvas-wrap">
+                        <canvas id="sigCanvas" width="700" height="220"></canvas>
+                        <div class="sig-canvas-hint" id="sigCanvasHint">Goreskan tanda tangan Anda di atas ini ↓</div>
+                    </div>
+                    <div class="sig-saved-preview" id="sigSavedPreview" style="display:none;">
+                        <div class="sig-preview-label">Tanda tangan tersimpan</div>
+                        <img id="sigPreviewImg" src="" alt="Tanda Tangan Tersimpan" class="sig-preview-img" />
+                    </div>
                 </div>
             </div>
 
-            <!-- Bulk bar -->
-            <div class="bulk-bar no-print" id="bulkBar">
-                <span id="bulkCount">0 dipilih</span>
-                <button class="btn btn-danger btn-xs" id="btnDeleteSelected">Hapus Terpilih</button>
-                <button class="btn btn-ghost btn-xs" id="btnDeselectAll">Batal</button>
-            </div>
-
-            <!-- Search & filter -->
-            <div class="search-filter-bar no-print" style="margin-bottom:1rem;">
-                <div class="search-wrapper">
-                    <svg class="svg-icon sm search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="adminSearch" placeholder="Cari nama, mata pelajaran, judul..." />
-                    <button class="btn-clear" id="adminClearSearch">✕</button>
+            <!-- Ganti Password Card -->
+            <div class="card" style="margin-top:1.5rem;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">🔐 Keamanan Akun Admin</div>
+                        <div class="card-subtitle">Ubah password login dashboard admin</div>
+                    </div>
                 </div>
-                <select class="filter-select" id="adminFilterSubject">
-                    <option value="">Semua Mata Pelajaran</option>
-                </select>
-                <select class="filter-select" id="adminFilterStatus">
-                    <option value="">Semua Status</option>
-                    <option value="tepat">Tepat Waktu</option>
-                    <option value="terlambat">Terlambat</option>
-                </select>
-                <span class="result-count" id="adminResultCount">0 tugas</span>
-            </div>
-
-            <div class="table-wrapper">
-                <table id="adminTable">
-                    <thead>
-                        <tr>
-                            <th class="no-print"><input type="checkbox" id="selectAll" title="Pilih semua" /></th>
-                            <th>#</th>
-                            <th data-sort="name">Nama ↕</th>
-                            <th data-sort="subject">Mata Pelajaran ↕</th>
-                            <th data-sort="title">Judul Tugas</th>
-                            <th>Link / File</th>
-                            <th data-sort="date">Tgl. Kumpul ↕</th>
-                            <th data-sort="deadline">Deadline ↕</th>
-                            <th data-sort="status">Status ↕</th>
-                            <th class="no-print">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="adminBody"></tbody>
-                </table>
-                <div class="empty-state" id="adminEmpty" style="display:none;">
-                    <p>Tidak ada tugas ditemukan.</p>
-                    <p class="empty-sub">Coba ubah filter atau kata kunci pencarian.</p>
-                </div>
+                <form id="formChangePw" onsubmit="return false;" style="max-width:400px;">
+                    <div class="form-group" style="margin-bottom:1rem;">
+                        <label for="pwCurrent">Password Saat Ini</label>
+                        <input type="password" id="pwCurrent" placeholder="Password lama..." required />
+                    </div>
+                    <div class="form-group" style="margin-bottom:1rem;">
+                        <label for="pwNew">Password Baru</label>
+                        <input type="password" id="pwNew" placeholder="Password baru minimal 6 karakter..." required />
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnChangePw">Ubah Password</button>
+                </form>
             </div>
         </div>
 
@@ -892,17 +965,18 @@
     <!-- TOAST -->
     <div id="toastContainer" class="toast-container" role="alert" aria-live="polite"></div>
 
-    <!-- MODAL -->
+    <!-- MODAL DELETE CONFIRMATION -->
     <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
         <div class="modal">
             <h3 id="modalTitle">Konfirmasi Hapus</h3>
-            <p id="modalMessage">Data akan dihapus permanen.</p>
+            <p id="modalMessage">Data akan dihapus secara permanen.</p>
             <div class="modal-actions">
                 <button class="btn btn-danger" id="btnConfirmDelete">Ya, Hapus</button>
                 <button class="btn btn-ghost" id="btnCancelDelete">Batal</button>
             </div>
         </div>
     </div>
+
 
     <script src="admin.js"></script>
 </body>

@@ -1,335 +1,541 @@
 /**
  * TaskFlow — script.js
- * Student form: CRUD localStorage, file upload (base64), URL, validasi, filter, sort, toast, modal
+ * Student form logic: dynamic assignments, saved profile, file upload (base64) / URL, receipt modal.
  */
 'use strict';
 
-const STORAGE_KEY = 'taskflow_tasks';
-const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
+const STORAGE_KEY    = 'taskflow_tasks';
+const ASSIGNMENT_KEY = 'taskflow_assignments';
+const PROFILE_KEY    = 'taskflow_student_profile';
+const DEADLINE_KEY   = 'taskflow_global_deadline';
+const MAX_FILE_SIZE  = 4 * 1024 * 1024; // 4 MB
+
+/* ===================== DEFAULT ASSIGNMENTS ===================== */
+const DEFAULT_ASSIGNMENTS = [
+    {
+        id: 'asgn_demo_1',
+        title: 'Tugas 1 — Making HTML Login Page',
+        subject: 'Pemrograman Web',
+        classGroup: 'Semua',
+        deadline: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 16),
+        description: 'Buat halaman login responsif menggunakan HTML5 dan CSS. Lampirkan link GitHub atau file ZIP.',
+        createdAt: new Date().toISOString()
+    },
+    {
+        id: 'asgn_demo_2',
+        title: 'Tugas 2 — Desain Database Relasional',
+        subject: 'Basis Data',
+        classGroup: 'Semua',
+        deadline: new Date(Date.now() + 10 * 86400000).toISOString().slice(0, 16),
+        description: 'Rancang ERD dan tabel database untuk sistem toko online. Lampirkan PDF atau file skema SQL.',
+        createdAt: new Date().toISOString()
+    }
+];
 
 /* ===================== STATE ===================== */
-let tasks           = [];
-let filteredTasks   = [];
-let pendingDeleteId = null;
-let sortKey         = 'date';
-let sortDir         = 'desc';
-let submitMode      = 'url';   // 'url' | 'file'
-let selectedFileData= null;    // { name, type, ext, size, base64, dataUrl }
+let tasks            = [];
+let assignments      = [];
+let filteredTasks    = [];
+let pendingDeleteId  = null;
+let sortKey          = 'date';
+let sortDir          = 'desc';
+let submitMode       = 'url';   // 'url' | 'file'
+let selectedFileData = null;    // { name, type, ext, size, base64 }
 
-/* ===================== DOM ===================== */
-const form           = document.getElementById('taskForm');
-const editIdField    = document.getElementById('editId');
-const btnLabel       = document.getElementById('btnLabel');
-const btnCancel      = document.getElementById('btnCancel');
-const btnReset       = document.getElementById('btnReset');
-const searchInput    = document.getElementById('searchInput');
-const btnClearSearch = document.getElementById('btnClearSearch');
-const filterStatus   = document.getElementById('filterStatus');
-const btnClearAll    = document.getElementById('btnClearAll');
-const taskBody       = document.getElementById('taskBody');
-const taskTable      = document.getElementById('taskTable');
-const emptyState     = document.getElementById('emptyState');
-const resultCount    = document.getElementById('resultCount');
-const toastContainer = document.getElementById('toastContainer');
-const modalOverlay   = document.getElementById('modalOverlay');
-const modalMessage   = document.getElementById('modalMessage');
-const btnConfirmDel  = document.getElementById('btnConfirmDelete');
-const btnCancelDel   = document.getElementById('btnCancelDelete');
+/* ===================== DOM ELEMENTS ===================== */
+const form               = document.getElementById('taskForm');
+const editIdField        = document.getElementById('editId');
+const btnLabel           = document.getElementById('btnLabel');
+const btnCancel          = document.getElementById('btnCancel');
+const btnReset           = document.getElementById('btnReset');
+const searchInput        = document.getElementById('searchInput');
+const btnClearSearch     = document.getElementById('btnClearSearch');
+const filterStatus       = document.getElementById('filterStatus');
+const btnClearAll        = document.getElementById('btnClearAll');
+const taskBody           = document.getElementById('taskBody');
+const emptyState         = document.getElementById('emptyState');
+const resultCount        = document.getElementById('resultCount');
+const toastContainer     = document.getElementById('toastContainer');
+const modalOverlay       = document.getElementById('modalOverlay');
+const modalMessage       = document.getElementById('modalMessage');
+const btnConfirmDel      = document.getElementById('btnConfirmDelete');
+const btnCancelDel       = document.getElementById('btnCancelDelete');
 
-// form fields
-const fName     = document.getElementById('inputName');
-const fSubject  = document.getElementById('inputSubject');
-const fTitle    = document.getElementById('inputTitle');
-const fLink     = document.getElementById('inputLink');
-const fDate     = document.getElementById('inputDate');
-const fDeadline = document.getElementById('inputDeadline');
+// Form fields
+const fName              = document.getElementById('inputName');
+const fClassGroup        = document.getElementById('inputClassGroup');
+const fSubject           = document.getElementById('inputSubject');
+const fTitle             = document.getElementById('inputTitle');
+const fLink              = document.getElementById('inputLink');
+const fDate              = document.getElementById('inputDate');
+const fDeadline          = document.getElementById('inputDeadline');
+const chkRemember        = document.getElementById('chkRemember');
+const selectAssignment   = document.getElementById('selectAssignment');
+const assignmentDetailCard = document.getElementById('assignmentDetailCard');
+const assignDetailSubject= document.getElementById('assignDetailSubject');
+const assignDetailDeadline= document.getElementById('assignDetailDeadline');
+const assignDetailTitle  = document.getElementById('assignDetailTitle');
+const assignDetailDesc   = document.getElementById('assignDetailDesc');
 
-// errors
-const errName     = document.getElementById('errName');
-const errSubject  = document.getElementById('errSubject');
-const errTitle    = document.getElementById('errTitle');
-const errLink     = document.getElementById('errLink');
-const errDate     = document.getElementById('errDate');
-const errDeadline = document.getElementById('errDeadline');
+// Profile banner
+const savedProfileBanner = document.getElementById('savedProfileBanner');
+const savedProfileAvatar = document.getElementById('savedProfileAvatar');
+const savedProfileText   = document.getElementById('savedProfileText');
+const btnChangeProfile   = document.getElementById('btnChangeProfile');
 
-// stats
-const statTotal     = document.getElementById('statTotal');
-const statTepat     = document.getElementById('statTepat');
-const statTerlambat = document.getElementById('statTerlambat');
-const statSiswa     = document.getElementById('statSiswa');
-const navBadge      = document.getElementById('navBadgeCount');
+// Error indicators
+const errName            = document.getElementById('errName');
+const errSubject         = document.getElementById('errSubject');
+const errTitle           = document.getElementById('errTitle');
+const errLink            = document.getElementById('errLink');
 
-// file upload UI
-const typeBtnUrl    = document.getElementById('typeBtnUrl');
-const typeBtnFile   = document.getElementById('typeBtnFile');
-const urlInputWrap  = document.getElementById('urlInputWrap');
-const fileInputWrap = document.getElementById('fileInputWrap');
-const dropzone      = document.getElementById('dropzone');
-const fileInput     = document.getElementById('fileInput');
-const filePreview   = document.getElementById('filePreview');
-const filePrevIcon  = document.getElementById('filePrevIcon');
-const filePrevName  = document.getElementById('filePrevName');
-const filePrevMeta  = document.getElementById('filePrevMeta');
-const btnRemoveFile = document.getElementById('btnRemoveFile');
+// Stats counters
+const statTotal          = document.getElementById('statTotal');
+const statTepat          = document.getElementById('statTepat');
+const statTerlambat      = document.getElementById('statTerlambat');
+const statSiswa          = document.getElementById('statSiswa');
 
-/* ===================== STORAGE ===================== */
-function loadTasks() { try { tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { tasks = []; } }
+// File upload UI
+const typeBtnUrl         = document.getElementById('typeBtnUrl');
+const typeBtnFile        = document.getElementById('typeBtnFile');
+const urlInputWrap       = document.getElementById('urlInputWrap');
+const fileInputWrap      = document.getElementById('fileInputWrap');
+const dropzone           = document.getElementById('dropzone');
+const fileInput          = document.getElementById('fileInput');
+const filePreview        = document.getElementById('filePreview');
+const filePrevIcon       = document.getElementById('filePrevIcon');
+const filePrevName       = document.getElementById('filePrevName');
+const filePrevMeta       = document.getElementById('filePrevMeta');
+const btnRemoveFile      = document.getElementById('btnRemoveFile');
+
+// Receipt Modal
+const receiptModalOverlay= document.getElementById('receiptModalOverlay');
+const rcptId             = document.getElementById('rcptId');
+const rcptName           = document.getElementById('rcptName');
+const rcptClass          = document.getElementById('rcptClass');
+const rcptSubject        = document.getElementById('rcptSubject');
+const rcptTitle          = document.getElementById('rcptTitle');
+const rcptDate           = document.getElementById('rcptDate');
+const rcptStatus         = document.getElementById('rcptStatus');
+const btnCopyReceipt     = document.getElementById('btnCopyReceipt');
+const btnCloseReceipt    = document.getElementById('btnCloseReceipt');
+
+/* ===================== STORAGE & INIT ===================== */
+function loadData() {
+    try { tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { tasks = []; }
+    try { assignments = JSON.parse(localStorage.getItem(ASSIGNMENT_KEY)) || []; } catch { assignments = []; }
+
+    if (!assignments || assignments.length === 0) {
+        assignments = DEFAULT_ASSIGNMENTS;
+        localStorage.setItem(ASSIGNMENT_KEY, JSON.stringify(assignments));
+    }
+
+    loadProfile();
+    renderAssignmentOptions();
+    renderTasks();
+    checkSignatureNotice();
+}
+
 function saveTasks() { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
 
+/* ===================== STUDENT PROFILE STORAGE ===================== */
+function loadProfile() {
+    try {
+        const prof = JSON.parse(localStorage.getItem(PROFILE_KEY));
+        if (prof && prof.name) {
+            if (fName) fName.value = prof.name;
+            if (fClassGroup && prof.classGroup) fClassGroup.value = prof.classGroup;
+            if (savedProfileBanner) {
+                savedProfileBanner.style.display = 'flex';
+                savedProfileAvatar.textContent = prof.name[0].toUpperCase();
+                savedProfileText.textContent = `Selamat datang kembali, ${prof.name} (${prof.classGroup || 'Siswa'})!`;
+            }
+        }
+    } catch {}
+}
+
+if (btnChangeProfile) {
+    btnChangeProfile.addEventListener('click', () => {
+        localStorage.removeItem(PROFILE_KEY);
+        if (fName) fName.value = '';
+        if (savedProfileBanner) savedProfileBanner.style.display = 'none';
+        showToast('info', '👤', 'Silakan masukkan data diri siswa baru.');
+    });
+}
+
+/* ===================== ASSIGNMENT DROPDOWN ===================== */
+function renderAssignmentOptions() {
+    if (!selectAssignment) return;
+    const selectedClass = fClassGroup ? fClassGroup.value : 'RPL 1';
+    
+    // Filter active assignments by class target
+    const activeList = assignments.filter(a => a.classGroup === 'Semua' || a.classGroup === selectedClass);
+    
+    let html = '<option value="">-- Pilih Tugas yang Diberikan Mentor --</option>';
+    activeList.forEach(a => {
+        html += `<option value="${a.id}">${escHtml(a.title)} (${escHtml(a.subject)})</option>`;
+    });
+    html += '<option value="custom">✍️ Input Judul &amp; Mapel Manual (Custom)</option>';
+    
+    selectAssignment.innerHTML = html;
+}
+
+if (fClassGroup) {
+    fClassGroup.addEventListener('change', () => {
+        renderAssignmentOptions();
+        if (chkRemember && chkRemember.checked && fName.value.trim()) {
+            localStorage.setItem(PROFILE_KEY, JSON.stringify({ name: fName.value.trim(), classGroup: fClassGroup.value }));
+        }
+    });
+}
+
+if (selectAssignment) {
+    selectAssignment.addEventListener('change', e => {
+        const val = e.target.value;
+        if (!val) {
+            if (assignmentDetailCard) assignmentDetailCard.style.display = 'none';
+            return;
+        }
+        if (val === 'custom') {
+            if (assignmentDetailCard) assignmentDetailCard.style.display = 'none';
+            if (fSubject) fSubject.value = '';
+            if (fTitle) fTitle.value = '';
+            if (fDeadline) fDeadline.value = getGlobalDeadline();
+            return;
+        }
+        
+        const asgn = assignments.find(a => a.id === val);
+        if (asgn) {
+            if (fSubject) fSubject.value = asgn.subject;
+            if (fTitle) fTitle.value = asgn.title;
+            if (fDeadline) fDeadline.value = asgn.deadline;
+            
+            if (assignmentDetailCard) {
+                assignmentDetailCard.style.display = 'block';
+                assignDetailSubject.textContent = asgn.subject + (asgn.classGroup !== 'Semua' ? ` • ${asgn.classGroup}` : '');
+                assignDetailDeadline.textContent = `Deadline: ${fmtDateTime(asgn.deadline)}`;
+                assignDetailTitle.textContent = asgn.title;
+                assignDetailDesc.textContent = asgn.description || 'Instruksi: Selesaikan tugas dan kumpulkan sebelum deadline.';
+            }
+        }
+    });
+}
+
 /* ===================== UTILITIES ===================== */
-function genId()    { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function fmtDate(d) {
-    if(!d) return '—';
-    // Handle datetime-local format: "2026-09-08T14:30"
+    if (!d) return '—';
     const dt = new Date(d);
-    if(isNaN(dt)) {
-        // Fallback: old date-only format "YYYY-MM-DD"
-        const [y,m,dy] = d.split('-');
-        return `${dy}/${m}/${y}`;
-    }
+    if (isNaN(dt.getTime())) return d;
     const pad = n => String(n).padStart(2,'0');
     return `${pad(dt.getDate())}/${pad(dt.getMonth()+1)}/${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
 }
+function fmtDateTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) + ' Jam ' +
+           d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+}
 function calcStatus(date, deadline) {
-    if(!date || !deadline) return 'unknown';
-    // Compare as strings (ISO datetime-local or date both sort correctly)
+    if (!date || !deadline) return 'unknown';
     return date <= deadline ? 'tepat' : 'terlambat';
 }
-function isValidUrl(s) { try { const u=new URL(s); return u.protocol==='http:'||u.protocol==='https:'; } catch{ return false; } }
-function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-function fmtBytes(b) { if(b<1024) return b+'B'; if(b<1024*1024) return (b/1024).toFixed(1)+' KB'; return (b/(1024*1024)).toFixed(2)+' MB'; }
-
-/* ---- File type helpers ---- */
-const FILE_TYPES = {
-    pdf:  { icon:'', label:'PDF',   cls:'ftype-pdf'  },
-    doc:  { icon:'', label:'DOC',   cls:'ftype-doc'  },
-    docx: { icon:'', label:'DOCX',  cls:'ftype-doc'  },
-    xls:  { icon:'', label:'XLS',   cls:'ftype-xls'  },
-    xlsx: { icon:'', label:'XLSX',  cls:'ftype-xls'  },
-    ppt:  { icon:'', label:'PPT',   cls:'ftype-ppt'  },
-    pptx: { icon:'', label:'PPTX',  cls:'ftype-ppt'  },
-    txt:  { icon:'', label:'TXT',   cls:'ftype-txt'  },
-    csv:  { icon:'', label:'CSV',   cls:'ftype-xls'  },
-    zip:  { icon:'', label:'ZIP',   cls:'ftype-zip'  },
-    rar:  { icon:'', label:'RAR',   cls:'ftype-zip'  },
-    '7z': { icon:'', label:'7Z',    cls:'ftype-zip'  },
-    jpg:  { icon:'', label:'JPG',   cls:'ftype-img'  },
-    jpeg: { icon:'', label:'JPEG',  cls:'ftype-img'  },
-    png:  { icon:'', label:'PNG',   cls:'ftype-img'  },
-    gif:  { icon:'', label:'GIF',   cls:'ftype-img'  },
-    webp: { icon:'', label:'WEBP',  cls:'ftype-img'  },
-    svg:  { icon:'', label:'SVG',   cls:'ftype-img'  },
-};
-function getFileType(ext='') { return FILE_TYPES[ext.toLowerCase()] || { icon:'', label:ext.toUpperCase()||'FILE', cls:'ftype-other' }; }
-function extOf(name='') { return name.includes('.') ? name.split('.').pop().toLowerCase() : ''; }
-
-/* ===================== SUBMIT MODE TOGGLE ===================== */
-typeBtnUrl.addEventListener('click', () => switchMode('url'));
-typeBtnFile.addEventListener('click', () => switchMode('file'));
-
-function switchMode(mode) {
-    submitMode = mode;
-    typeBtnUrl.classList.toggle('active', mode==='url');
-    typeBtnFile.classList.toggle('active', mode==='file');
-    urlInputWrap.style.display  = mode==='url'  ? 'block' : 'none';
-    fileInputWrap.style.display = mode==='file' ? 'block' : 'none';
-    clearFieldError(fLink, errLink);
-}
-
-/* ===================== DROPZONE ===================== */
-dropzone.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', e => { if(e.target.files[0]) processFile(e.target.files[0]); });
-
-// Drag & drop
-dropzone.addEventListener('dragover',  e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-dropzone.addEventListener('dragleave', e => { dropzone.classList.remove('drag-over'); });
-dropzone.addEventListener('drop',      e => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if(file) processFile(file);
-});
-
-function processFile(file) {
-    if(file.size > MAX_FILE_SIZE) {
-        showToast('error','⚠️',`File terlalu besar (${fmtBytes(file.size)}). Maksimum 4 MB.`);
-        return;
-    }
-    const ext = extOf(file.name);
-    const reader = new FileReader();
-    reader.onload = e => {
-        const base64 = e.target.result;
-        selectedFileData = { name: file.name, type: file.type, ext, size: file.size, base64 };
-        showFilePreview(selectedFileData);
-        clearFieldError(fLink, errLink);
-    };
-    reader.onerror = () => showToast('error','❌','Gagal membaca file.');
-    reader.readAsDataURL(file); // stores as base64 data URL
-}
-
-function showFilePreview(fd) {
-    const ft = getFileType(fd.ext);
-    filePrevIcon.textContent = ft.icon;
-    filePrevName.textContent = fd.name;
-    filePrevMeta.textContent = `${ft.label} • ${fmtBytes(fd.size)}`;
-    dropzone.style.display  = 'none';
-    filePreview.style.display = 'flex';
-}
-
-function resetFileUpload() {
-    selectedFileData = null;
-    fileInput.value  = '';
-    dropzone.style.display  = 'block';
-    filePreview.style.display = 'none';
-}
-
-btnRemoveFile.addEventListener('click', resetFileUpload);
-
-/* ===================== GLOBAL DEADLINE MANAGEMENT ===================== */
-const DEADLINE_KEY = 'taskflow_global_deadline';
+function isValidUrl(s) { try { const u = new URL(s); return u.protocol === 'http:' || u.protocol === 'https:'; } catch { return false; } }
+function escHtml(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+function fmtBytes(b) { if(b < 1024) return b+'B'; if(b < 1024*1024) return (b/1024).toFixed(1)+' KB'; return (b/(1024*1024)).toFixed(2)+' MB'; }
 
 function getGlobalDeadline() {
     let dl = localStorage.getItem(DEADLINE_KEY);
     if (!dl) {
         const d = new Date();
         d.setDate(d.getDate() + 7);
-        d.setHours(23, 59, 0, 0);
         dl = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
         localStorage.setItem(DEADLINE_KEY, dl);
     }
     return dl;
 }
 
-function updateStudentDeadlineDisplay() {
-    const dispEl = document.getElementById('studentDeadlineDisplayText');
-    const hiddenEl = document.getElementById('inputDeadline');
-    const dl = getGlobalDeadline();
-    if (hiddenEl) hiddenEl.value = dl;
-    if (dispEl) {
-        const dt = new Date(dl);
-        if (isNaN(dt.getTime())) {
-            dispEl.textContent = dl;
-        } else {
-            const dayStr = dt.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-            const timeStr = dt.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            dispEl.textContent = `${dayStr} • Jam ${timeStr} WIB`;
-        }
-    }
+/* ===================== FILE UPLOAD TOGGLE ===================== */
+if (typeBtnUrl) typeBtnUrl.addEventListener('click', () => switchMode('url'));
+if (typeBtnFile) typeBtnFile.addEventListener('click', () => switchMode('file'));
+
+function switchMode(mode) {
+    submitMode = mode;
+    if (typeBtnUrl) typeBtnUrl.classList.toggle('active', mode === 'url');
+    if (typeBtnFile) typeBtnFile.classList.toggle('active', mode === 'file');
+    if (urlInputWrap) urlInputWrap.style.display  = mode === 'url'  ? 'block' : 'none';
+    if (fileInputWrap) fileInputWrap.style.display = mode === 'file' ? 'block' : 'none';
+    clearFieldError(fLink, errLink);
 }
 
-/* ===================== VALIDATION ===================== */
-function clearErrors() {
-    [fName,fSubject,fTitle,fLink].forEach(el => { if(el) el.classList.remove('input-error'); });
-    [errName,errSubject,errTitle,errLink].forEach(el => { if(el) el.textContent=''; });
+if (dropzone) {
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    dropzone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+        if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+    });
 }
-function clearFieldError(field, errEl) { if(field) field.classList.remove('input-error'); if(errEl) errEl.textContent=''; }
-function setErr(field, errEl, msg) { if(field) field.classList.add('input-error'); if(errEl) errEl.textContent = msg; }
+if (fileInput) fileInput.addEventListener('change', e => { if (e.target.files[0]) processFile(e.target.files[0]); });
+
+function processFile(file) {
+    if (file.size > MAX_FILE_SIZE) {
+        showToast('error', '⚠️', `File terlalu besar (${fmtBytes(file.size)}). Maks. 4 MB.`);
+        return;
+    }
+    const ext = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
+    const reader = new FileReader();
+    reader.onload = e => {
+        selectedFileData = { name: file.name, type: file.type, ext, size: file.size, base64: e.target.result };
+        showFilePreview(selectedFileData);
+        clearFieldError(fLink, errLink);
+    };
+    reader.onerror = () => showToast('error', '❌', 'Gagal membaca file.');
+    reader.readAsDataURL(file);
+}
+
+function showFilePreview(fd) {
+    if (filePrevIcon) filePrevIcon.textContent = fd.ext.toUpperCase() || 'FILE';
+    if (filePrevName) filePrevName.textContent = fd.name;
+    if (filePrevMeta) filePrevMeta.textContent = `${fd.ext.toUpperCase()} • ${fmtBytes(fd.size)}`;
+    if (dropzone) dropzone.style.display = 'none';
+    if (filePreview) filePreview.style.display = 'flex';
+}
+
+function resetFileUpload() {
+    selectedFileData = null;
+    if (fileInput) fileInput.value = '';
+    if (dropzone) dropzone.style.display = 'block';
+    if (filePreview) filePreview.style.display = 'none';
+}
+if (btnRemoveFile) btnRemoveFile.addEventListener('click', resetFileUpload);
+
+/* ===================== VALIDATION & SUBMIT ===================== */
+function clearErrors() {
+    [fName, fSubject, fTitle, fLink].forEach(el => { if (el) el.classList.remove('input-error'); });
+    [errName, errSubject, errTitle, errLink].forEach(el => { if (el) el.textContent = ''; });
+}
+function clearFieldError(field, errEl) { if (field) field.classList.remove('input-error'); if (errEl) errEl.textContent = ''; }
+function setErr(field, errEl, msg) { if (field) field.classList.add('input-error'); if (errEl) errEl.textContent = msg; }
 
 function validateForm() {
     clearErrors();
     let ok = true;
-    if(!fName.value.trim())    { setErr(fName,errName,'Nama tidak boleh kosong.'); ok=false; }
-    if(!fSubject.value.trim()) { setErr(fSubject,errSubject,'Mata pelajaran tidak boleh kosong.'); ok=false; }
-    if(!fTitle.value.trim())   { setErr(fTitle,errTitle,'Judul tugas tidak boleh kosong.'); ok=false; }
+    if (!fName.value.trim()) { setErr(fName, errName, 'Nama tidak boleh kosong.'); ok = false; }
+    if (!fSubject.value.trim()) { setErr(fSubject, errSubject, 'Mata pelajaran tidak boleh kosong.'); ok = false; }
+    if (!fTitle.value.trim()) { setErr(fTitle, errTitle, 'Judul tugas tidak boleh kosong.'); ok = false; }
 
-    if(submitMode==='url') {
-        if(!fLink.value.trim())          { setErr(fLink,errLink,'Link tidak boleh kosong.'); ok=false; }
-        else if(!isValidUrl(fLink.value.trim())) { setErr(fLink,errLink,'Masukkan URL valid (awali dengan https://).'); ok=false; }
+    if (submitMode === 'url') {
+        if (!fLink.value.trim()) { setErr(fLink, errLink, 'Link tidak boleh kosong.'); ok = false; }
+        else if (!isValidUrl(fLink.value.trim())) { setErr(fLink, errLink, 'Masukkan URL valid (http:// atau https://).'); ok = false; }
     } else {
-        if(!selectedFileData)            { if(errLink) errLink.textContent='Pilih file terlebih dahulu.'; ok=false; }
+        if (!selectedFileData) { if (errLink) errLink.textContent = 'Pilih file terlebih dahulu.'; ok = false; }
     }
-
     return ok;
 }
 
-/* ===================== FORM SUBMIT ===================== */
-form.addEventListener('submit', e => {
-    e.preventDefault();
-    if(!validateForm()) { showToast('error','⚠️','Harap lengkapi semua field yang wajib diisi.'); return; }
+if (form) {
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        if (!validateForm()) { showToast('error', '⚠️', 'Harap lengkapi semua field bertanda *'); return; }
 
-    const isEdit = !!editIdField.value;
-    const now = new Date();
-    const nowLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,16);
-    const submitDate = (isEdit && fDate.value) ? fDate.value : nowLocal;
-    const activeDeadline = getGlobalDeadline();
+        const isEdit = !!editIdField.value;
+        const now = new Date();
+        const nowLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+        const submitDate = (isEdit && fDate.value) ? fDate.value : nowLocal;
+        const activeDeadline = fDeadline.value || getGlobalDeadline();
 
-    const data = {
-        name:     fName.value.trim(),
-        subject:  fSubject.value.trim(),
-        title:    fTitle.value.trim(),
-        date:     submitDate,        // auto-generated current timestamp "YYYY-MM-DDTHH:mm"
-        deadline: activeDeadline,    // set by mentor/admin
-        status:   calcStatus(submitDate, activeDeadline),
-        submitMode,
-    };
-
-    if(submitMode === 'url') {
-        data.link     = fLink.value.trim();
-        data.fileName = null;
-        data.fileExt  = null;
-        data.fileSize = null;
-        data.fileData = null;  // no binary storage for URL mode
-    } else {
-        data.link     = null;
-        data.fileName = selectedFileData.name;
-        data.fileExt  = selectedFileData.ext;
-        data.fileSize = selectedFileData.size;
-        data.fileData = selectedFileData.base64; // data URL (base64)
-    }
-
-    if(isEdit) {
-        const idx = tasks.findIndex(t=>t.id===editIdField.value);
-        if(idx!==-1) tasks[idx] = {...tasks[idx], ...data};
-        cancelEdit();
-        showToast('info','✏️','Tugas berhasil diperbarui!');
-    } else {
-        data.id = genId();
-        data.createdAt = new Date().toISOString();
-        tasks.unshift(data);
-        showToast('success','✅','Tugas berhasil dikumpulkan!');
-    }
-
-    try {
-        saveTasks();
-    } catch(err) {
-        // localStorage quota exceeded (file too large)
-        if(err.name==='QuotaExceededError' || err.code===22) {
-            showToast('error','⚠️','Penyimpanan browser penuh. File terlalu besar, gunakan link URL saja.');
-            tasks.shift(); // rollback
-            return;
+        // Save profile if remember checked
+        if (chkRemember && chkRemember.checked) {
+            localStorage.setItem(PROFILE_KEY, JSON.stringify({ name: fName.value.trim(), classGroup: fClassGroup.value }));
+            loadProfile();
         }
+
+        const data = {
+            name: fName.value.trim(),
+            classGroup: fClassGroup.value,
+            subject: fSubject.value.trim(),
+            title: fTitle.value.trim(),
+            assignmentId: selectAssignment ? selectAssignment.value : '',
+            date: submitDate,
+            deadline: activeDeadline,
+            status: calcStatus(submitDate, activeDeadline),
+            submitMode,
+        };
+
+        if (submitMode === 'url') {
+            data.link = fLink.value.trim();
+            data.fileName = null;
+            data.fileData = null;
+        } else {
+            data.link = null;
+            data.fileName = selectedFileData.name;
+            data.fileExt  = selectedFileData.ext;
+            data.fileSize = selectedFileData.size;
+            data.fileData = selectedFileData.base64;
+        }
+
+        if (isEdit) {
+            const idx = tasks.findIndex(t => t.id === editIdField.value);
+            if (idx !== -1) tasks[idx] = { ...tasks[idx], ...data };
+            cancelEdit();
+            showToast('info', '✏️', 'Tugas berhasil diperbarui!');
+        } else {
+            data.id = genId();
+            data.createdAt = new Date().toISOString();
+            tasks.unshift(data);
+            showToast('success', '✅', 'Tugas berhasil dikumpulkan!');
+            openReceiptModal(data);
+        }
+
+        try {
+            saveTasks();
+            renderTasks();
+            if (!isEdit) resetFormKeepProfile();
+        } catch (err) {
+            showToast('error', '⚠️', 'Penyimpanan penuh. Gunakan opsi link URL.');
+        }
+    });
+}
+
+function resetFormKeepProfile() {
+    const savedProf = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}');
+    form.reset();
+    if (savedProf.name) fName.value = savedProf.name;
+    if (savedProf.classGroup) fClassGroup.value = savedProf.classGroup;
+    resetFileUpload();
+    if (selectAssignment) selectAssignment.value = '';
+    if (assignmentDetailCard) assignmentDetailCard.style.display = 'none';
+}
+
+/* ===================== RECEIPT MODAL ===================== */
+let currentReceiptText = '';
+
+function openReceiptModal(data) {
+    if (!receiptModalOverlay) return;
+    rcptId.textContent = `#TF-${data.id.slice(-6).toUpperCase()}`;
+    rcptName.textContent = data.name;
+    rcptClass.textContent = data.classGroup || 'RPL 1';
+    rcptSubject.textContent = data.subject;
+    rcptTitle.textContent = data.title;
+    rcptDate.textContent = fmtDateTime(data.date);
+    
+    if (data.status === 'tepat') {
+        rcptStatus.innerHTML = '<span style="color:#059669;font-weight:800;">✓ Tepat Waktu</span>';
+    } else {
+        rcptStatus.innerHTML = '<span style="color:#dc2626;font-weight:800;">⏰ Terlambat</span>';
     }
 
-    form.reset();
-    resetFileUpload();
-    switchMode('url');
-    applyFilters();
+    currentReceiptText = `BUKTI PENGUMPULAN TUGAS (TASKFLOW)\nNo. Resi: #TF-${data.id.slice(-6).toUpperCase()}\nNama: ${data.name} (${data.classGroup})\nMapel: ${data.subject}\nJudul: ${data.title}\nWaktu Kumpul: ${fmtDateTime(data.date)}\nStatus: ${data.status === 'tepat' ? 'Tepat Waktu' : 'Terlambat'}`;
+
+    receiptModalOverlay.classList.add('show');
+    receiptModalOverlay.setAttribute('aria-hidden', 'false');
+}
+
+if (btnCloseReceipt) {
+    btnCloseReceipt.addEventListener('click', () => {
+        receiptModalOverlay.classList.remove('show');
+        receiptModalOverlay.setAttribute('aria-hidden', 'true');
+    });
+}
+
+if (btnCopyReceipt) {
+    btnCopyReceipt.addEventListener('click', () => {
+        navigator.clipboard.writeText(currentReceiptText).then(() => {
+            showToast('success', '📋', 'Ringkasan bukti berhasil disalin!');
+        });
+    });
+}
+
+/* ===================== RENDER TASK TABLE ===================== */
+function renderTasks() {
+    filterAndSortTasks();
     updateStats();
 
-    // Notify same-tab admin by dispatching a storage event manually
-    // (native storage event doesn't fire in the same tab)
-    window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY }));
+    if (!taskBody) return;
+    if (filteredTasks.length === 0) {
+        taskBody.innerHTML = '';
+        if (emptyState) emptyState.style.display = 'block';
+        if (resultCount) resultCount.textContent = '0 tugas';
+        return;
+    }
 
-    // Scroll to task list safely
-    const listEl = document.querySelector('.card[style], #taskTable')?.closest?.('.card') || document.querySelector('.list-section');
-    if(listEl) listEl.scrollIntoView({behavior:'smooth', block:'start'});
-});
+    if (emptyState) emptyState.style.display = 'none';
+    if (resultCount) resultCount.textContent = `${filteredTasks.length} tugas`;
 
-btnReset.addEventListener('click', () => { clearErrors(); cancelEdit(); resetFileUpload(); switchMode('url'); });
+    taskBody.innerHTML = filteredTasks.map((t, index) => {
+        const linkHtml = t.submitMode === 'file'
+            ? `<a href="${t.fileData}" download="${escHtml(t.fileName)}" class="badge badge-file" title="Download ${escHtml(t.fileName)}">📎 ${escHtml(t.fileName)}</a>`
+            : `<a href="${escHtml(t.link)}" target="_blank" rel="noopener" class="badge badge-link">🔗 Lihat Link</a>`;
 
-/* ===================== EDIT ===================== */
-function startEdit(id) {
-    const t = tasks.find(x=>x.id===id); if(!t) return;
-    editIdField.value = id;
-    fName.value    = t.name;
+        const statusBadge = t.status === 'tepat'
+            ? `<span class="badge badge-tepat">✓ Tepat</span>`
+            : `<span class="badge badge-terlambat">⏰ Terlambat</span>`;
+
+        return `
+            <tr>
+                <td data-label="#">${index + 1}</td>
+                <td data-label="Nama"><strong>${escHtml(t.name)}</strong> <span style="font-size:0.75rem;color:var(--text-muted);">(${escHtml(t.classGroup || 'RPL 1')})</span></td>
+                <td data-label="Mata Pelajaran">${escHtml(t.subject)}</td>
+                <td data-label="Judul Tugas">${escHtml(t.title)}</td>
+                <td data-label="Link / File">${linkHtml}</td>
+                <td data-label="Tgl Kumpul">${fmtDate(t.date)}</td>
+                <td data-label="Deadline">${fmtDate(t.deadline)}</td>
+                <td data-label="Status">${statusBadge}</td>
+                <td data-label="Aksi">
+                    <div class="action-group">
+                        <button class="btn-action edit" onclick="editTask('${t.id}')" title="Edit Data">✏️</button>
+                        <button class="btn-action delete" onclick="confirmDelete('${t.id}')" title="Hapus Data">🗑️</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterAndSortTasks() {
+    const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const st = filterStatus ? filterStatus.value : '';
+
+    filteredTasks = tasks.filter(t => {
+        const matchQ = !q || t.name.toLowerCase().includes(q) || t.subject.toLowerCase().includes(q) || t.title.toLowerCase().includes(q);
+        const matchSt = !st || t.status === st;
+        return matchQ && matchSt;
+    });
+
+    filteredTasks.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+}
+
+function updateStats() {
+    const total     = tasks.length;
+    const tepat     = tasks.filter(t => t.status === 'tepat').length;
+    const terlambat = tasks.filter(t => t.status === 'terlambat').length;
+    const unique    = new Set(tasks.map(t => t.name.toLowerCase())).size;
+
+    if (statTotal) statTotal.textContent = total;
+    if (statTepat) statTepat.textContent = tepat;
+    if (statTerlambat) statTerlambat.textContent = terlambat;
+    if (statSiswa) statSiswa.textContent = unique;
+}
+
+/* ===================== EDIT & DELETE ===================== */
+window.editTask = function(id) {
+    const t = tasks.find(x => x.id === id);
+    if (!t) return;
+    editIdField.value = t.id;
+    fName.value = t.name;
+    if (fClassGroup) fClassGroup.value = t.classGroup || 'RPL 1';
     fSubject.value = t.subject;
-    fTitle.value   = t.title;
-    fDate.value    = t.date;
-    fDeadline.value= t.deadline;
+    fTitle.value = t.title;
+    fDate.value = t.date;
+    fDeadline.value = t.deadline;
 
-    if(t.submitMode==='file' && t.fileData) {
+    if (t.submitMode === 'file' && t.fileData) {
         switchMode('file');
-        selectedFileData = { name:t.fileName, type:'', ext:t.fileExt, size:t.fileSize, base64:t.fileData };
+        selectedFileData = { name: t.fileName, ext: t.fileExt || 'file', size: t.fileSize || 0, base64: t.fileData };
         showFilePreview(selectedFileData);
     } else {
         switchMode('url');
@@ -338,254 +544,94 @@ function startEdit(id) {
 
     btnLabel.textContent = 'Simpan Perubahan';
     btnCancel.style.display = 'inline-flex';
-    document.querySelector('.form-section').scrollIntoView({behavior:'smooth',block:'start'});
-    fName.focus();
-}
+    form.scrollIntoView({ behavior: 'smooth' });
+};
 
 function cancelEdit() {
     editIdField.value = '';
     btnLabel.textContent = 'Kumpulkan Tugas';
     btnCancel.style.display = 'none';
-    clearErrors();
+    resetFormKeepProfile();
 }
-btnCancel.addEventListener('click', () => { cancelEdit(); form.reset(); resetFileUpload(); switchMode('url'); });
+if (btnCancel) btnCancel.addEventListener('click', cancelEdit);
 
-/* ===================== DELETE ===================== */
-function openDeleteModal(id, all=false) {
-    pendingDeleteId = all ? '__ALL__' : id;
-    modalMessage.textContent = all
-        ? 'Semua tugas akan dihapus permanen. Tindakan ini tidak bisa dibatalkan!'
-        : 'Data tugas ini akan dihapus permanen dan tidak dapat dikembalikan.';
-    modalOverlay.classList.add('active');
-}
-function closeModal() { modalOverlay.classList.remove('active'); pendingDeleteId=null; }
-btnCancelDel.addEventListener('click', closeModal);
-modalOverlay.addEventListener('click', e => { if(e.target===modalOverlay) closeModal(); });
-btnConfirmDel.addEventListener('click', () => {
-    if(pendingDeleteId==='__ALL__') { tasks=[]; showToast('error','🗑','Semua tugas telah dihapus.'); }
-    else if(pendingDeleteId) { tasks=tasks.filter(t=>t.id!==pendingDeleteId); showToast('error','🗑','Tugas telah dihapus.'); }
-    saveTasks(); closeModal(); applyFilters(); updateStats();
-});
-btnClearAll.addEventListener('click', () => { if(tasks.length===0){showToast('info','ℹ️','Tidak ada tugas.');return;} openDeleteModal(null,true); });
-
-/* ===================== SEARCH & FILTER ===================== */
-searchInput.addEventListener('input', () => { btnClearSearch.style.display=searchInput.value?'block':'none'; applyFilters(); });
-btnClearSearch.addEventListener('click', () => { searchInput.value=''; btnClearSearch.style.display='none'; applyFilters(); });
-filterStatus.addEventListener('change', applyFilters);
-
-function applyFilters() {
-    const q  = searchInput.value.toLowerCase().trim();
-    const st = filterStatus.value;
-    filteredTasks = tasks.filter(t => {
-        const mQ = !q || t.name.toLowerCase().includes(q) || t.subject.toLowerCase().includes(q) || (t.title||'').toLowerCase().includes(q);
-        const mS = !st || t.status===st;
-        return mQ && mS;
-    });
-    sortData(); renderTable();
-}
-
-/* ===================== SORT ===================== */
-function sortData() {
-    filteredTasks.sort((a,b)=>{
-        let va=a[sortKey]||'', vb=b[sortKey]||'';
-        return sortDir==='asc' ? (va>vb?1:-1) : (va<vb?1:-1);
-    });
-}
-document.querySelectorAll('th[data-sort]').forEach(th => {
-    th.addEventListener('click', () => {
-        const key = th.dataset.sort;
-        if(sortKey===key) sortDir=sortDir==='asc'?'desc':'asc';
-        else { sortKey=key; sortDir='asc'; }
-        document.querySelectorAll('th[data-sort]').forEach(t=>t.classList.remove('sort-asc','sort-desc'));
-        th.classList.add(sortDir==='asc'?'sort-asc':'sort-desc');
-        sortData(); renderTable();
-    });
-});
-
-/* ===================== RENDER TABLE ===================== */
-function renderFileCell(t) {
-    if(t.submitMode==='file' && t.fileData) {
-        const ft = getFileType(t.fileExt);
-        return `<button class="task-link" style="background:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;" onclick="downloadFile('${escHtml(t.id)}')" title="Download ${escHtml(t.fileName)}">
-            <span class="file-type-badge ${ft.cls}">${ft.label}</span>
-            <span style="font-size:.72rem;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(t.fileName)}</span>
-        </button>`;
-    }
-    return `<a href="${escHtml(t.link)}" target="_blank" rel="noopener" class="task-link">
-        <span class="file-type-badge ftype-link">URL</span>
-    </a>`;
-}
-
-function renderTable() {
-    taskBody.innerHTML='';
-    resultCount.textContent=`${filteredTasks.length} tugas`;
-    if(filteredTasks.length===0) { emptyState.style.display='block'; taskTable.style.display='none'; return; }
-    emptyState.style.display='none'; taskTable.style.display='table';
-
-    filteredTasks.forEach((t,i) => {
-        const badge = t.status==='tepat'
-            ? `<span class="badge badge-tepat">Tepat Waktu</span>`
-            : `<span class="badge badge-terlambat">Terlambat</span>`;
-        const tr = document.createElement('tr');
-        tr.innerHTML=`
-            <td data-label="No" class="row-num">${i+1}</td>
-            <td data-label="Nama"><strong>${escHtml(t.name)}</strong></td>
-            <td data-label="Mapel">${escHtml(t.subject)}</td>
-            <td data-label="Judul" title="${escHtml(t.title)}">${escHtml(t.title.length>38?t.title.slice(0,38)+'…':t.title)}</td>
-            <td data-label="File">${renderFileCell(t)}</td>
-            <td data-label="Dikumpulkan">${fmtDate(t.date)}</td>
-            <td data-label="Deadline">${fmtDate(t.deadline)}</td>
-            <td data-label="Status">${badge}</td>
-            <td data-label="Aksi"><div class="action-group">
-                <button class="btn-edit" data-id="${t.id}">Edit</button>
-                <button class="btn-delete" data-id="${t.id}">Hapus</button>
-            </div></td>`;
-        tr.style.opacity='0'; tr.style.transform='translateY(6px)';
-        taskBody.appendChild(tr);
-        requestAnimationFrame(()=>{ tr.style.transition=`opacity .25s ease ${i*.03}s,transform .25s ease ${i*.03}s`; tr.style.opacity='1'; tr.style.transform='translateY(0)'; });
-    });
-}
-
-taskBody.addEventListener('click', e => {
-    const ed=e.target.closest('.btn-edit');   if(ed) startEdit(ed.dataset.id);
-    const dl=e.target.closest('.btn-delete'); if(dl) openDeleteModal(dl.dataset.id);
-});
-
-/* ===================== FILE DOWNLOAD ===================== */
-window.downloadFile = function(id) {
-    const t = tasks.find(x=>x.id===id);
-    if(!t||!t.fileData) return;
-    const a = document.createElement('a');
-    a.href = t.fileData;
-    a.download = t.fileName || 'file';
-    a.click();
+window.confirmDelete = function(id) {
+    pendingDeleteId = id;
+    if (modalMessage) modalMessage.textContent = 'Data pengumpulan tugas ini akan dihapus permanen.';
+    if (modalOverlay) { modalOverlay.classList.add('show'); modalOverlay.setAttribute('aria-hidden', 'false'); }
 };
 
-/* ===================== STATS ===================== */
-function updateStats() {
-    const total    = tasks.length;
-    const tepat    = tasks.filter(t=>t.status==='tepat').length;
-    const terlambat= tasks.filter(t=>t.status==='terlambat').length;
-    const unique   = new Set(tasks.map(t=>t.name.toLowerCase())).size;
-    animCount(statTotal,     total);
-    animCount(statTepat,     tepat);
-    animCount(statTerlambat, terlambat);
-    animCount(statSiswa,     unique);
-    if(navBadge) navBadge.textContent = total;
+if (btnConfirmDel) {
+    btnConfirmDel.addEventListener('click', () => {
+        if (pendingDeleteId) {
+            tasks = tasks.filter(t => t.id !== pendingDeleteId);
+            saveTasks();
+            renderTasks();
+            showToast('info', '🗑️', 'Tugas berhasil dihapus.');
+            pendingDeleteId = null;
+        }
+        closeModal();
+    });
 }
-function animCount(el, target) {
-    if(!el) return;
-    const start=parseInt(el.textContent)||0; if(start===target) return;
-    const dur=500, t0=performance.now();
-    const tick=now=>{const p=Math.min((now-t0)/dur,1); el.textContent=Math.round(start+(target-start)*(1-Math.pow(1-p,3))); if(p<1) requestAnimationFrame(tick);};
-    requestAnimationFrame(tick);
+if (btnCancelDel) btnCancelDel.addEventListener('click', closeModal);
+
+function closeModal() {
+    if (modalOverlay) { modalOverlay.classList.remove('show'); modalOverlay.setAttribute('aria-hidden', 'true'); }
 }
 
-/* ===================== TOAST ===================== */
-function showToast(type, icon, msg) {
-    const t=document.createElement('div');
-    t.className=`toast toast-${type}`;
-    const iconHtml = icon ? `<span class="toast-icon">${icon}</span>` : '';
-    t.innerHTML=`${iconHtml}<span>${msg}</span>`;
-    toastContainer.appendChild(t);
-    setTimeout(()=>{ t.classList.add('hide'); t.addEventListener('animationend',()=>t.remove(),{once:true}); }, 3500);
+if (btnClearAll) {
+    btnClearAll.addEventListener('click', () => {
+        if (tasks.length === 0) return;
+        if (confirm('Apakah Anda yakin ingin menghapus seluruh riwayat pengumpulan tugas?')) {
+            tasks = [];
+            saveTasks();
+            renderTasks();
+            showToast('warning', '🗑️', 'Seluruh data tugas telah dibersihkan.');
+        }
+    });
 }
 
-/* ===================== INIT ===================== */
-(function init(){
-    loadTasks();
-    const now = new Date();
-    const nowLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0,16);
-    if(!fDate.value) fDate.value = nowLocal;
-    updateStudentDeadlineDisplay();
-    window.addEventListener('storage', e => { if(e.key === DEADLINE_KEY) updateStudentDeadlineDisplay(); });
-    applyFilters();
-    updateStats();
-    initSigDisplay();
-    initSecretAdmin();
-})();
+/* ===================== SEARCH & FILTER EVENTS ===================== */
+if (searchInput) searchInput.addEventListener('input', renderTasks);
+if (btnClearSearch) btnClearSearch.addEventListener('click', () => { searchInput.value = ''; renderTasks(); });
+if (filterStatus) filterStatus.addEventListener('change', renderTasks);
 
-/* ===================== SIGNATURE DISPLAY (STUDENT) ===================== */
-const SIG_KEY = 'taskflow_signature';
-
-function initSigDisplay() {
-    const noticeCard    = document.getElementById('sigNoticeCard');
-    const btnViewSig    = document.getElementById('btnViewSig');
-    const sigModalOv    = document.getElementById('sigModalOverlay');
+/* ===================== SIGNATURE DISPLAY ===================== */
+function checkSignatureNotice() {
+    const sig = localStorage.getItem('taskflow_mentor_signature');
+    const noticeCard = document.getElementById('sigNoticeCard');
+    const btnViewSig = document.getElementById('btnViewSig');
     const sigDisplayImg = document.getElementById('sigDisplayImg');
-    const btnCloseSig   = document.getElementById('btnCloseSigModal');
-    if(!noticeCard) return;
+    const sigModalOverlay = document.getElementById('sigModalOverlay');
+    const btnCloseSigModal = document.getElementById('btnCloseSigModal');
 
-    function loadSig() {
-        const sig = localStorage.getItem(SIG_KEY);
-        if(sig) {
-            noticeCard.style.display = 'flex';
-            if(sigDisplayImg) sigDisplayImg.src = sig;
-        } else {
-            noticeCard.style.display = 'none';
+    if (sig && noticeCard) {
+        noticeCard.style.display = 'flex';
+        if (btnViewSig && sigDisplayImg) {
+            btnViewSig.onclick = () => {
+                sigDisplayImg.src = sig;
+                if (sigModalOverlay) sigModalOverlay.classList.add('show');
+            };
+        }
+        if (btnCloseSigModal && sigModalOverlay) {
+            btnCloseSigModal.onclick = () => sigModalOverlay.classList.remove('show');
         }
     }
-    loadSig();
-
-    // Poll for signature changes (cross-tab via storage event)
-    window.addEventListener('storage', e => { if(e.key===SIG_KEY) loadSig(); });
-
-    if(btnViewSig) btnViewSig.addEventListener('click', () => {
-        sigModalOv.classList.add('active');
-        sigModalOv.setAttribute('aria-hidden','false');
-    });
-    if(btnCloseSig) btnCloseSig.addEventListener('click', () => {
-        sigModalOv.classList.remove('active');
-        sigModalOv.setAttribute('aria-hidden','true');
-    });
-    if(sigModalOv) sigModalOv.addEventListener('click', e => {
-        if(e.target===sigModalOv) { sigModalOv.classList.remove('active'); }
-    });
 }
 
-/* ===================== SECRET ADMIN ACCESS ===================== */
-function initSecretAdmin() {
-    // 1. Direct Secret Button in Top Nav (discreet icon)
-    const secretBtn = document.getElementById('secretAdminBtn');
-    if (secretBtn) {
-        secretBtn.addEventListener('click', () => {
-            showToast('info', '', 'Mengalihkan ke Halaman Admin...');
-        });
-    }
-
-    // 2. Secret Multi-Click Trigger: Click Mentor avatar or chip 5 times rapidly
-    const mentorTarget = document.querySelector('.mentor-chip') || document.querySelector('.mentor-avatar');
-    if (mentorTarget) {
-        let clickCount = 0;
-        let clickTimer = null;
-        mentorTarget.style.cursor = 'pointer';
-
-        mentorTarget.addEventListener('click', () => {
-            clickCount++;
-            clearTimeout(clickTimer);
-
-            if (clickCount >= 5) {
-                clickCount = 0;
-                showToast('info', '', 'Akses Rahasia Admin Terbuka!');
-                setTimeout(() => { window.location.href = 'admin.html'; }, 500);
-            } else if (clickCount >= 3) {
-                // Subtle hint for mentor
-                showToast('info', '', `Klik ${5 - clickCount}x lagi untuk Admin`);
-                clickTimer = setTimeout(() => { clickCount = 0; }, 2500);
-            } else {
-                clickTimer = setTimeout(() => { clickCount = 0; }, 2000);
-            }
-        });
-    }
-
-    // 3. Secret Keyboard Shortcut: Ctrl + Shift + A or Alt + A
-    document.addEventListener('keydown', e => {
-        if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') || (e.altKey && e.key.toLowerCase() === 'a')) {
-            e.preventDefault();
-            showToast('info', '', 'Akses Rahasia: Mengalihkan ke Admin...');
-            setTimeout(() => { window.location.href = 'admin.html'; }, 400);
-        }
-    });
+/* ===================== TOAST NOTIFICATION ===================== */
+function showToast(type, icon, message) {
+    if (!toastContainer) return;
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+    toastContainer.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
 }
 
-
+// Initial load
+document.addEventListener('DOMContentLoaded', loadData);
