@@ -8,7 +8,7 @@ const STORAGE_KEY    = 'taskflow_tasks';
 const ASSIGNMENT_KEY = 'taskflow_assignments';
 const PROFILE_KEY    = 'taskflow_student_profile';
 const DEADLINE_KEY   = 'taskflow_global_deadline';
-const MAX_FILE_SIZE  = 4 * 1024 * 1024; // 4 MB
+const MAX_FILE_SIZE  = 10 * 1024 * 1024; // 10 MB
 
 /* ===================== DEFAULT ASSIGNMENTS ===================== */
 const DEFAULT_ASSIGNMENTS = [
@@ -283,7 +283,7 @@ if (fileInput) fileInput.addEventListener('change', e => { if (e.target.files[0]
 
 function processFile(file) {
     if (file.size > MAX_FILE_SIZE) {
-        showToast('error', '⚠️', `File terlalu besar (${fmtBytes(file.size)}). Maks. 4 MB.`);
+        showToast('error', '⚠️', `File terlalu besar (${fmtBytes(file.size)}). Maks. 10 MB.`);
         return;
     }
     const ext = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
